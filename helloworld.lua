@@ -4,13 +4,13 @@ xcode = [[
   p( "Hello World" )
 ]]
 
-xcode = [[
+code = [[
   p( "Test#2" )
   p( 40 +( 2 ) )
   Lawn p( "Hello World", "This is hot!" )
 ]]
 
-code = [[
+xcode = [[
   setSlot( "debugEval", method(
     message arguments each( chunk,
       p( "#{chunk asString} = #{chunk eval}" interpolate )

@@ -21,6 +21,7 @@ function test1_object_ids()
     assertEqual( object, runtime.ObjectById[ id ] )
     assertEqual( runtime.ObjectId[ object ], id )
   end
+  assertNotEqual( objects[0], objects[1] )
 end
 
 function test2_object_reset()
@@ -147,6 +148,48 @@ function test5_same_level_inheritance()
   gpop.taxes = 'low'
   runtime.setInheritance( dad, gpop, masculineNS )
   assertEqual( runtime.valueFromNamespace( kid3, 'taxes', masculineNS ), gpop.taxes )
+end
+
+function test6_isKindOf()
+  local mom = runtime.blank( )
+  local dad = runtime.blank( )
+  local kid1 = runtime.childFrom( dad )
+  local gpop = runtime.blank( )
+  assertTrue(  runtime.isKindOf( kid1, dad ) )
+  assertFalse( runtime.isKindOf( kid1, gpop ) )
+  runtime.setInheritance( dad, gpop )
+  assertTrue( runtime.isKindOf( kid1, gpop ) )
+  assertTrue( runtime.isKindOf( kid1, kid1 ) )  
+  
+  local kid2 = runtime.blank( )
+  runtime.addInheritance( kid2, dad )
+  assertTrue( runtime.isKindOf( kid2, dad ) )
+
+
+  local kid3 = runtime.blank( )
+  runtime.addInheritance( kid3, dad, nil, true )
+  runtime.addInheritance( kid3, mom )
+  assertTrue( runtime.isKindOf( kid3, dad ) )  
+  assertTrue( runtime.isKindOf( kid3, mom ) )  
+
+  local jim = runtime.blank( )
+  local jam = runtime.blank( )
+  local jem = runtime.blank( )
+  
+  -- A nice circular loop; it must be able to be resolved
+  runtime.addInheritance( jam, jim )
+  runtime.addInheritance( jem, jam )
+  runtime.addInheritance( jim, jem )
+  
+  assertTrue( runtime.isKindOf( jim, jam ) )
+  assertTrue( runtime.isKindOf( jim, jem ) )
+  assertTrue( runtime.isKindOf( jam, jim ) )
+  assertTrue( runtime.isKindOf( jam, jem ) )
+  assertTrue( runtime.isKindOf( jem, jim ) )
+  assertTrue( runtime.isKindOf( jem, jam ) )
+  
+  local foo = runtime.blank( )
+  local bar = runtime.blank( )
 end
 
 runTests()
