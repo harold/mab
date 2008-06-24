@@ -11,7 +11,7 @@ grammar = [[
 	Chunk         <-   &. -> startChunk <Expression> (<Terminator> <Expression>)* -> endChunk
 	Expression    <-   &. -> startExpr <Space> (<Message>/<String>/<Number>)+ -> endExpr
 	ArgExpression <-   <Chunk> -> addArgChunk ("," <Space> / &<CloseParen>)
-	Message       <-   ( <Identifier>/ <Operator> ) -> startMessage <Arguments>?  <Separator>* -> endMessage
+	Message       <-   ( <Identifier> / <Operator> ) -> startMessage <Arguments>?  <Separator>* -> endMessage
 	Arguments     <-   <OpenParen> <ArgExpression>* <CloseParen>
 	Identifier    <-   [a-zA-Z_]+
 	Operator      <-   [=~`!@$%^&*|<>?/\\+-]+
