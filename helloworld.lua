@@ -1,10 +1,5 @@
 require 'parser'
 xcode = [[
-	p( "Test#1" )
-	p( "Hello World" )
-]]
-
-code = [[
 	p( "Test#2" )
 	p( 40 +( 2 ) )
 	Lawn p( "Hello World", "This is hot!" )
@@ -175,31 +170,6 @@ xcode = [[
 xcode = [[
 	p( 'Test#12' )
 	p( 'program is:', program )
-]]
-
-code = [[
-  p( 'Test#13(lucky)' )
-  setSlot( 'limit', 100 )
-  setSlot( 'i', 2 )
-  setSlot( 'primes', Object new )
-  while( i <(limit),
-    primes setSlot( i, true )
-    setSlot( 'i', i + 1 )
-  )
-  setSlot( 'i', 2 )
-  while( i <(limit),
-    setSlot( 'j', i )
-    while( j <(limit),
-      setSlot( 'j', j + i )
-      primes setSlot( j, false )
-    )
-    setSlot( 'i', i + 1 )
-  )
-  setSlot( 'i', 0 )
-  while( i <(limit),
-    if( primes getSlot( i ), p( i ) )
-    setSlot( 'i', i + 1 )
-  )
 ]]
 
 local theLastCoreObjectIndex = #runtime.ObjectById

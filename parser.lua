@@ -128,3 +128,9 @@ core.String.interpolate = core.createLuaFunc( function( context )
 	end)
 	return runtime.string[ str ]
 end )
+
+function runString( code )
+	core.Lawn.program = parser.parse( code )
+	core.evaluateChunk( core.Lawn.program )
+	-- TODO: error codes
+end
