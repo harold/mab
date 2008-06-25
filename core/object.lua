@@ -12,7 +12,7 @@ end )
 Object.getSlot = createLuaFunc( 'slotName', function( context ) -- Object#getSlot
 	-- TODO: get via messages?
 	-- TODO: should I really be casting to a string always? 
-  local slotName = toLuaString( context.slotName )
+	local slotName = toLuaString( context.slotName )
 	return context.self[ slotName ] or Lawn['nil']
 end )
 
@@ -21,15 +21,15 @@ Object.id = createLuaFunc( function( context ) -- Object#id
 end )
 
 Object.self = createLuaFunc( function( context ) -- Object#self
-  return context.self
+	return context.self
 end )
 
 Object['=='] = createLuaFunc( 'obj2', function( context ) -- Object#==
-  return ( context.self == context.obj2 ) and Lawn['true'] or Lawn['false']
+	return ( context.self == context.obj2 ) and Lawn['true'] or Lawn['false']
 end )
 
 Object.toString = createLuaFunc( function( context ) -- Object#toString
-  local theIntrinsicName = rawget(context.self, "__name")
+	local theIntrinsicName = rawget(context.self, "__name")
 	if theIntrinsicName then
 		return runtime.string[ string.format("%s (0x%04x)", runtime.luastring[theIntrinsicName], runtime.ObjectId[ context.self ] ) ]
 	else

@@ -1,7 +1,6 @@
-package.path = '../?.lua;' .. package.path
-require 'lunity'
+require 'test/lunity'
 
-module( 'test_runtime', lunity )
+module( 'TEST_RUNTIME', lunity )
 
 function setup()
   require 'runtime'
@@ -187,9 +186,27 @@ function test6_isKindOf()
   assertTrue( runtime.isKindOf( jam, jem ) )
   assertTrue( runtime.isKindOf( jem, jim ) )
   assertTrue( runtime.isKindOf( jem, jam ) )
-  
-  local foo = runtime.blank( )
-  local bar = runtime.blank( )
 end
 
+function test7_duplicate_with_hierarchy()
+  local mom = runtime.blank( )
+  local dad = runtime.blank( )
+  local kid = runtime.childFrom( mom )
+  runtime.addInheritance( kid, dad )
+  assertTrue( runtime.isKindOf( kid, mom ) )
+  assertTrue( runtime.isKindOf( kid, dad ) )
+  kid.name    = "Bobby"
+  kid.toys    = { "cars", "dolls" }
+  
+  local organ_donor = runtime.duplicate( kid )
+  assertTrue( runtime.isKindOf( organ_donor, mom ) )
+  assertTrue( runtime.isKindOf( organ_donor, dad ) )
+  assertEqual( kid.name, organ_donor.name )
+  assertEqual( kid.toys, organ_donor.toys )
+  
+  organ_donor.name    = "Bubby"
+  organ_donor.toys[3] = "outlets"
+  assertNotEqual( kid.name, organ_donor.name )
+  assertEqual( kid.toys, organ_donor.toys, "Duplication should be a shallow copy." )
+end
 runTests()
