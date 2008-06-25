@@ -3,17 +3,17 @@ require 'test/lunity'
 module( 'TEST_ACCEPTANCE', lunity )
 
 tests = {
-	"1a_hello_world",
-	"2_this_is_hot",
-	"2b_debugEval",
-	"3_beer",
-	"4_simple_method",
-	"5_toString_override",
-	"6_contexts",
-	"7_simple_add",
-	"7b_add_no_parens",
-	"8a_newton_ugly",
-	"8c_newton_pretty",
+	"01a_hello_world",
+	"02_this_is_hot",
+	"02b_debugEval",
+	"03_beer",
+	"04_simple_method",
+	"05_toString_override",
+	"06_contexts",
+	"07_simple_add",
+	"07b_add_no_parens",
+	"08a_newton_ugly",
+	"08c_newton_pretty",
 	"10a_dynamic_expression",
 	"10b_appendMessage",
 	"10c_dynamicMessage",
@@ -63,7 +63,7 @@ function makeAcceptance( testName )
 end
 
 for i,testName in ipairs(tests) do
-	_M["test"..i.."_"..testName] = makeAcceptance( testName )
+	_M["test_"..testName] = makeAcceptance( testName )
 end
 
 
