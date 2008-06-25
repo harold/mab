@@ -1,0 +1,23 @@
+p( "Test#8a" )
+setSlot( "mySqrt", method( x,
+	
+	setSlot( "goodEnough", method( guess,
+		guess *( guess ) -( x ) abs <( 0.0001 )
+	) )
+		
+	setSlot( "improve", method( guess,
+		x /( guess ) +( guess ) /( 2 )
+	) )
+		
+	setSlot( "sqrtIter", method( guess,
+		if( goodEnough( guess ),
+			guess,
+			sqrtIter( improve(guess), x )
+		)
+	) )
+		
+	sqrtIter( 1, x )
+) )
+
+setSlot( "x", 25 )
+p( "The sqrt of #{x} is #{mySqrt( 25 )}" interpolate )

@@ -1,0 +1,5 @@
+p( "Test#7a" )
+setSlot( "add", method( a, b,
+	a +( b )
+) )
+p( add(40,2) )

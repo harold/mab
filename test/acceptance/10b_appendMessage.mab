@@ -1,0 +1,5 @@
+p( "Test#10b" )
+setSlot( "myExpr", Expression new )
+setSlot( "myMessage", Message new( "p", "Hello, world!" ) )
+myExpr appendMessage( myMessage )
+myExpr eval

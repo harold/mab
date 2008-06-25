@@ -1,0 +1,6 @@
+p( "Test#4" )
+setSlot( "bar", method(
+	p( "Hello" )
+	p(" World")
+ ) )
+bar

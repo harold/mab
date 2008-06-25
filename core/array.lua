@@ -23,6 +23,6 @@ end )
 Array.each = createLuaFunc( function( context ) -- Array#each
 	-- TODO: implement this properly
 	for i,v in ipairs(context.self) do
-		print(i,v)
+		--print(i,v)
 	end
 end )

@@ -1,0 +1,3 @@
+p( "Test#2" )
+p( 40 +( 2 ) )
+Lawn p( "Hello World", "This is hot!" )

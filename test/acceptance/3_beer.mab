@@ -1,0 +1,11 @@
+p( "Test#3" )
+setSlot( "sing", method(
+	setSlot( "bottles", 99 )
+	while( bottles >( 0 ),
+		p( "#{bottles} bottles of beer on the wall, #{bottles} bottles of beer!" interpolate )
+		setSlot( 'bottles', bottles -( 1 ) )
+		p( "Take one down, pass it around, #{bottles} bottles of beer on the wall." interpolate )
+	)
+	p( "Cheer!" )
+) )
+sing

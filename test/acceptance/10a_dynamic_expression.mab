@@ -1,0 +1,3 @@
+p( "Test#10a" )
+setSlot( "myExpr", Expression new( p( "Hello, world!" ) ) )
+myExpr eval

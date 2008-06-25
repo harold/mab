@@ -1,0 +1,22 @@
+p( "Test#8c" )
+mySqrt = method( x,
+	
+	goodEnough = method( guess,
+		guess * guess - x abs < 0.0001
+	)
+		
+	improve = method( guess,
+		x / guess + guess / 2
+	)
+		
+	sqrtIter = method( guess,
+		if(
+			goodEnough( guess ),
+			guess,
+			sqrtIter( improve(guess), x )
+		)
+	)
+		
+	sqrtIter( 1, x )
+)
+p( mySqrt( 24 ) )

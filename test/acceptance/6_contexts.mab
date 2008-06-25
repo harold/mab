@@ -1,0 +1,11 @@
+p( "Test#6" )
+setSlot( 'go', method(
+	setSlot( 'gadget', method(
+		p( self )
+		p( context self )
+		p( context )
+		p( context self self )
+	))
+	gadget
+))
+go

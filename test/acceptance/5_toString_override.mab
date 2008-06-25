@@ -1,0 +1,5 @@
+p( "Test#5" )
+setSlot( "billy", Object new )
+p( billy )
+billy setSlot( 'toString', "Billy the Kid" )
+p( billy )
