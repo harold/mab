@@ -1,1 +1,1 @@
-Boolean  = runtime.childFrom( Object, "Boolean" )
+Boolean = runtime.childFrom( Object, "Boolean" )

@@ -124,9 +124,9 @@ end
 -- Ensures that the value is a function OR may be called as one
 function assertInvokable( value, msg )
   local meta = getmetatable(value)
-  if (type(value) ~= 'function') or not (meta and meta.__call) then
+	if (type(value) ~= 'function') and not ( meta and meta.__call and (type(meta.__call)=='function') ) then
     if not msg then
-      msg = string.format( "assertInvokable() failed: value %s can not be called as a function",
+      msg = string.format( "assertInvokable() failed: '%s' can not be called as a function",
         tostring(value)
       )
     end
@@ -168,7 +168,9 @@ function is_userdata( value ) return type(value)=='userdata' end
 
 function __runAllTests(testSuite)
   lunity.__assertsPassed = 0
-  
+  print( string.rep('=',78) )
+  print( testSuite._NAME )
+  print( string.rep('=',78) )
   local theTestNames = {}
   for testName,test in pairs(testSuite) do
     if type(test)=='function' and type(testName)=='string' and (testName:find("^test") or testName:find("test$")) then
@@ -194,7 +196,7 @@ function __runAllTests(testSuite)
   end
   
   print( string.format(
-    "%s\n%d/%d tests passed (%0.1f%%)\n%d total successful assertions",
+    "%s\n%d/%d tests passed (%0.1f%%)\n%d total successful assertions\n",
     string.rep( '-', 78 ),
     theSuccessCount,
     #theTestNames,

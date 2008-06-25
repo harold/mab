@@ -1,6 +1,6 @@
 Number = runtime.childFrom( Object, "Number" )
 
-runtime.number    = {}
+runtime.number		= {}
 runtime.luanumber = {}
 setmetatable( runtime.number, {
 	__index = function( self, value )
@@ -14,19 +14,19 @@ setmetatable( runtime.number, {
 Number['+'] = createLuaFunc( 'addend', function( context ) -- Number#+
 	--local myValue = runtime.luanumber[ context.self ]
 	--local nextValue = runtime.luanumber[ context.message.next ]
-  --context.nextMessage = context.message.next.next
+	--context.nextMessage = context.message.next.next
 	--print( myValue + nextValue )
 	local lvalue, rvalue
 	lvalue = runtime.luanumber[ context.self ]
 	if context.addend ~= Lawn['nil'] then
-	  rvalue = runtime.luanumber[ context.addend ]
+		rvalue = runtime.luanumber[ context.addend ]
 	else
-	  local theNextMessageOrLiteral = context.message.next
-	  if theNextMessageOrLiteral == Lawn['nil'] then
-	    error( "Number#+ is missing an addend" )
-	  end
-	  context.owningContext.nextMessage = theNextMessageOrLiteral.next
-	  rvalue = runtime.luanumber[ sendMessage( context.owningContext, theNextMessageOrLiteral ) ]
+		local theNextMessageOrLiteral = context.message.next
+		if theNextMessageOrLiteral == Lawn['nil'] then
+			error( "Number#+ is missing an addend" )
+		end
+		context.owningContext.nextMessage = theNextMessageOrLiteral.next
+		rvalue = runtime.luanumber[ sendMessage( context.owningContext, theNextMessageOrLiteral ) ]
 	end
 	return runtime.number[ lvalue + rvalue ]
 end )
@@ -70,12 +70,12 @@ Number.abs = createLuaFunc( function( context ) -- Number#abs
 end )
 
 Number.toString = createLuaFunc( function( context ) -- Number#toString
-  local theIntrinsicName = rawget( context.self, '__name' )
+	local theIntrinsicName = rawget( context.self, '__name' )
 	if theIntrinsicName then
 		return runtime.string[ string.format("%s (0x%04x)", runtime.luastring[theIntrinsicName], runtime.ObjectId[ context.self ] ) ]
-  else
-  	return runtime.string[ tostring( runtime.luanumber[ context.self ] ) ]
-  end
+	else
+		return runtime.string[ tostring( runtime.luanumber[ context.self ] ) ]
+	end
 end )
 
 Number.asCode = Number.toString

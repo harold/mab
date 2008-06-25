@@ -3,9 +3,7 @@ require 're'
 
 require 'core'
 require 'runtime'
-local re,runtime,core,io,table,ipairs,tostring,tonumber,error,table,string = re,runtime,core,io,table,ipairs,tostring,tonumber,error,table,string
-local print=print
-module('parser')
+module('parser',package.seeall)
 
 grammar = [[
 	Chunk         <-   &. -> startChunk <Expression> (<Terminator> <Expression>)* -> endChunk
@@ -91,33 +89,22 @@ end
 function codeFromAST( t )
 	if t.tag=="chunk" then
 		local chunk = core.createChunk()
-		for i,childAST in ipairs(t) do
-			chunk[i] = codeFromAST( childAST )
-			chunk[i].chunk = chunk
-			if i>1 then
-			  chunk[i-1].next = chunk[i]
-			  chunk[i].previous = chunk[i-1]
-			end
+		for i,childAST in ipairs( t ) do
+			core.addChildren( chunk, 'chunk', codeFromAST( childAST ) )
 		end
-		
 		return chunk
 		
 	elseif t.tag=="expression" then
 		local expression = core.createExpression()
 		for i,childAST in ipairs(t) do
-			expression[i] = codeFromAST( childAST )
-			expression[i].expression = expression
-			if i>1 then
-				expression[i-1].next = expression[i]
-				expression[i].previous = expression[i-1]
-			end
+			core.addChildren( expression, 'expression', codeFromAST( childAST ) )
 		end
 		return expression
 		
 	elseif t.tag=="message" then
 		local message = core.createMessage( t.str )
 		for i,childAST in ipairs(t) do
-			message.arguments[i] = codeFromAST( childAST )
+			core.addChildren( message.arguments, 'message', codeFromAST( childAST ) )
 		end
 		return message
 
