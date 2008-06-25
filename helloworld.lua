@@ -24,13 +24,13 @@ xcode = [[
 xcode = [[
   p( "Test#3" )
   setSlot( "sing", method(
-  	setSlot( "bottles", 99 )
-  	while( bottles >( 0 ),
-  		p( "#{bottles} bottles of beer on the wall, #{bottles} bottles of beer!" interpolate )
-  		setSlot( 'bottles', bottles -( 1 ) )
-  		p( "Take one down, pass it around, #{bottles} bottles of beer on the wall." interpolate )
-  	)
-  	p( "Cheer!" )
+    setSlot( "bottles", 99 )
+    while( bottles >( 0 ),
+        p( "#{bottles} bottles of beer on the wall, #{bottles} bottles of beer!" interpolate )
+        setSlot( 'bottles', bottles -( 1 ) )
+        p( "Take one down, pass it around, #{bottles} bottles of beer on the wall." interpolate )
+    )
+    p( "Cheer!" )
   ) )
   sing
 ]]
@@ -38,8 +38,8 @@ xcode = [[
 xcode = [[
   p( "Test#4" )
   setSlot( "bar", method(
-  	p( "Hello" )
-  	p(" World")
+    p( "Hello" )
+    p(" World")
    ) )
   bar
 ]]
@@ -56,10 +56,10 @@ xcode = [[
   p( "Test#6" )
   setSlot( 'go', method(
     setSlot( 'gadget', method(
-    	p( self )
-    	p( context self )
-    	p( context )
-    	p( context self self )
+        p( self )
+        p( context self )
+        p( context )
+        p( context self self )
     ))
     gadget
   ))
@@ -68,72 +68,72 @@ xcode = [[
 
 xcode = [[
   p( "Test#7a" )
-	setSlot( "add", method( a, b,
-		a +( b )
-	) )
-	
-	p( add(40,2) )
+    setSlot( "add", method( a, b,
+        a +( b )
+    ) )
+    
+    p( add(40,2) )
 ]]
 
 xcode = [[
   p( "Test#7b" )
-	setSlot( "add", method( a, b,
-		a + b
-	) )
-	
-	p( add(40,2) )
+    setSlot( "add", method( a, b,
+        a + b
+    ) )
+    
+    p( add(40,2) )
 ]]
 
 xcode = [[
   p( "Test#8a" )
-	setSlot( "mySqrt", method( x,
-		
-		setSlot( "goodEnough", method( guess,
-			guess *( guess ) -( x ) abs <( 0.0001 )
-		) )
-			
-		setSlot( "improve", method( guess,
-			x /( guess ) +( guess ) /( 2 )
-		) )
-			
-		setSlot( "sqrtIter", method( guess,
-			if( goodEnough( guess ),
-				guess,
-				sqrtIter( improve(guess), x )
-			)
-		) )
-			
-		sqrtIter( 1, x )
-	) )
+    setSlot( "mySqrt", method( x,
+        
+        setSlot( "goodEnough", method( guess,
+            guess *( guess ) -( x ) abs <( 0.0001 )
+        ) )
+            
+        setSlot( "improve", method( guess,
+            x /( guess ) +( guess ) /( 2 )
+        ) )
+            
+        setSlot( "sqrtIter", method( guess,
+            if( goodEnough( guess ),
+                guess,
+                sqrtIter( improve(guess), x )
+            )
+        ) )
+            
+        sqrtIter( 1, x )
+    ) )
   
   setSlot( "x", 25 )
-	p( "The sqrt of #{x} is #{mySqrt( 25 )}" interpolate )
+    p( "The sqrt of #{x} is #{mySqrt( 25 )}" interpolate )
 ]]
 
 xcode = [[
   p( "Test#8c" )
-	mySqrt = method( x,
-		
-		goodEnough = method( guess,
-			guess * guess - x abs < 0.0001
-		)
-			
-		improve = method( guess,
-			x / guess + guess / 2
-		)
-			
-		sqrtIter = method( guess,
-			if(
-				goodEnough( guess ),
-				guess,
-				sqrtIter( improve(guess), x )
-			)
-		)
-			
-		sqrtIter( 1, x )
-	)
+    mySqrt = method( x,
+        
+        goodEnough = method( guess,
+            guess * guess - x abs < 0.0001
+        )
+            
+        improve = method( guess,
+            x / guess + guess / 2
+        )
+            
+        sqrtIter = method( guess,
+            if(
+                goodEnough( guess ),
+                guess,
+                sqrtIter( improve(guess), x )
+            )
+        )
+            
+        sqrtIter( 1, x )
+    )
 
-	p( mySqrt( 24 )	)
+    p( mySqrt( 24 )	)
 ]]
 
 xcode = [[
@@ -177,11 +177,37 @@ xcode = [[
   p( 'program is:', program )
 ]]
 
+code = [[
+  p( 'Test#13(lucky)' )
+  setSlot( 'limit', 100 )
+  setSlot( 'i', 2 )
+  setSlot( 'primes', Object new )
+  while( i <(limit),
+    primes setSlot( i, true )
+    setSlot( 'i', i + 1 )
+  )
+  setSlot( 'i', 2 )
+  while( i <(limit),
+    setSlot( 'j', i )
+    while( j <(limit),
+      setSlot( 'j', j + i )
+      primes setSlot( j, false )
+    )
+    setSlot( 'i', i + 1 )
+  )
+  setSlot( 'i', 0 )
+  while( i <(limit),
+    if( primes getSlot( i ), p( i ) )
+    setSlot( 'i', i + 1 )
+  )
+]]
+
 local theLastCoreObjectIndex = #runtime.ObjectById
 core.Lawn.program = parser.parse( code )
 local theLastParsedObjectIndex = #runtime.ObjectById
 core.evaluateChunk( core.Lawn.program )
 local theLastRuntimeObjectIndex = #runtime.ObjectById
+
 
 print( string.rep("=",70) )
 print( theLastCoreObjectIndex.." core objects:" )
