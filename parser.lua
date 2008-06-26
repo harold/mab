@@ -90,21 +90,21 @@ function codeFromAST( t )
 	if t.tag=="chunk" then
 		local chunk = core.createChunk()
 		for i,childAST in ipairs( t ) do
-			core.addChildren( chunk, 'chunk', codeFromAST( childAST ) )
+			core.addChildren( chunk, codeFromAST( childAST ) )
 		end
 		return chunk
 		
 	elseif t.tag=="expression" then
 		local expression = core.createExpression()
 		for i,childAST in ipairs(t) do
-			core.addChildren( expression, 'expression', codeFromAST( childAST ) )
+			core.addChildren( expression, codeFromAST( childAST ) )
 		end
 		return expression
 		
 	elseif t.tag=="message" then
 		local message = core.createMessage( t.str )
 		for i,childAST in ipairs(t) do
-			core.addChildren( message.arguments, 'message', codeFromAST( childAST ) )
+			core.addChildren( message.arguments, codeFromAST( childAST ) )
 		end
 		return message
 

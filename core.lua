@@ -4,7 +4,7 @@ module( 'core', package.seeall )
 function createChunk( ... )
 	local chunk = runtime.childFrom( Chunk )
 	if select('#',...) > 0 then
-		addChildren( chunk, 'chunk', ... )
+		addChildren( chunk, ... )
 	end
 	return chunk
 end
@@ -12,7 +12,7 @@ end
 function createExpression( ... )
 	local expression = runtime.childFrom( Expression )
 	if select('#',...) > 0 then
-		addChildren( expression, 'expression', ... )
+		addChildren( expression, ... )
 	end
 	return expression
 end
@@ -22,17 +22,17 @@ function createMessage( messageString, ... )
 	message.identifier = runtime.string[messageString]
 	message.arguments = runtime.childFrom( ArgList )
 	if select('#',...) > 0 then
-		addChildren( message.arguments, 'message', ... )
+		addChildren( message.arguments, ... )
 	end
 	return message
 end
 
-function addChildren( parent, parentName, ... )
+function addChildren( parent, ... )
 	for i=1,select('#',...) do
 		local child = select(i,...)
 		local index = #parent + 1
-		parent[index]     = child
-		child[parentName] = parent
+		parent[index] = child
+		child.parent  = parent
 		if index > 1 then
 			parent[index-1].next = child
 			child.previous       = parent[index-1]
@@ -110,7 +110,7 @@ function sendMessage( receiver, messageOrLiteral )
 	local obj = receiver[ messageName ]
 	if obj == Lawn['nil'] then
 		-- TODO: method_mising
-		-- TODO: No need to bail, just flow through to return Lawn.nil
+		-- FIXME: No need to error, just flow through to return Lawn.nil
 		error( "Cannot find message '"..tostring(messageName).."' on "..tostring(receiver) )
 	elseif obj.executeOnAccess ~= Lawn['nil'] then
 		obj = executeFunction( obj, receiver, messageOrLiteral )
@@ -120,7 +120,7 @@ function sendMessage( receiver, messageOrLiteral )
 end
 
 function executeFunction( functionObject, receiver, message )
-	local owningContext = message.expression and message.expression.context
+	local owningContext = message.parent.context
 	if owningContext == Lawn['nil'] then
 		-- if _DEBUG then print( "Warning: No message/expression context when sending '"..runtime.luastring[message.identifier].."'...so I'm using the Lawn instead.") end
 		owningContext = Lawn
