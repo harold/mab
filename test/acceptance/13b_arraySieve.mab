@@ -1,0 +1,20 @@
+p( "Test#13bArraySeive" )
+setSlot( "limit", 50 )
+setSlot( "primes", Array new )
+setSlot( "i", 1 )
+while( i<(limit),
+	primes push( true )
+	setSlot( "i", i + 1 )
+)
+setSlot( "i", 2 )
+while( i<(limit),
+	setSlot( "j", i )
+	while( j<(limit),
+		setSlot( "j", j + i )
+		primes atPut( j, false )
+	)
+	setSlot( "i", i + 1 )
+)
+primes eachWithIndex( value, index,
+	if( value, p( index ) )
+)

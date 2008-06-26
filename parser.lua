@@ -3,6 +3,7 @@ require 're'
 
 require 'core'
 require 'runtime'
+require 'utils'
 module('parser',package.seeall)
 
 grammar = [[
