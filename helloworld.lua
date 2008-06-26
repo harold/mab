@@ -1,6 +1,6 @@
 require 'parser'
 code = [[
-	p( 'This can still be used for simple tests' )
+p( "This can still be used." )
 ]]
 
 local theLastCoreObjectIndex = #runtime.ObjectById

@@ -7,6 +7,14 @@ Array.push = createLuaFunc( function( context ) -- Array#push
 	end
 end )
 
+Array.at = createLuaFunc( 'index', function( context ) --Array#at
+	return context.self[ runtime.luanumber[context.index] ]
+end)
+Array.atPut = createLuaFunc( 'index', 'value', function( context ) -- Array#atPut
+	-- TODO: HH - holycrap error checking
+	context.self[ runtime.luanumber[context.index] ] = context.value
+end)
+
 Array.size = createLuaFunc( function( context ) -- Array#size
 	return runtime.number[ #context.self ]
 end)
@@ -20,9 +28,27 @@ Array.join = createLuaFunc( 'separator', function( context ) -- Array#join
 	return runtime.string[ table.concat( theMessages, theSeparator ) ]
 end )
 
+-- TODO: holycrap these are brutal.
 Array.each = createLuaFunc( function( context ) -- Array#each
-	-- TODO: implement this properly
+	local args = context.message.arguments
 	for i,v in ipairs(context.self) do
-		--print(i,v)
+	  -- What could possibly go wrong?
+		context[ runtime.luastring[args[1][1][1].identifier] ] = v
+		for i,v in ipairs(args[2]) do
+			evaluateExpression( v, context )
+		end
+	end
+end )
+
+Array.eachWithIndex = createLuaFunc( function( context ) -- Array#eachWithIndex
+	local args = context.message.arguments
+	for i,v in ipairs(context.self) do
+	  -- What could possibly go wrong?
+		context[ runtime.luastring[args[1][1][1].identifier] ] = v
+	  -- What could possibly go wrong?
+		context[ runtime.luastring[args[2][1][1].identifier] ] = runtime.number[i]
+		for i,v in ipairs(args[3]) do
+			evaluateExpression( v, context )
+		end
 	end
 end )

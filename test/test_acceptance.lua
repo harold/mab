@@ -19,7 +19,8 @@ tests = {
 	"10c_dynamicMessage",
 	"11_eval",
 	"12_program",
-	"13_sieve"
+	"13_sieve",
+	"13b_arraySieve"
 }
 
 function setup()
