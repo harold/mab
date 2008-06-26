@@ -44,6 +44,18 @@ Context['if'] = createLuaFunc( function( context ) -- Context#if
 end )
 
 Context.toString = createLuaFunc( function( context ) -- Context#toString
+	if context.self == Lawn or context.self == Context then
+		return context.self.__name
+	else
+		return runtime.string[
+			string.format( "<Context of '%s'>",
+				runtime.luastring[ context.self.message.identifier ]
+			)
+		]
+	end
+end )
+
+Context.asCode = createLuaFunc( function( context ) -- Context#asCode
 	if context.self == Lawn then
 		return runtime.string[ string.format("%s (0x%04x)", "Lawn", runtime.ObjectId[ context.self ] ) ]
 	elseif context.self == Context then

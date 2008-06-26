@@ -1,6 +1,4 @@
 Test#12
 program is:
-<Chunk (0x007c)
-        p( "Test#12" )
-        p( "program is:", program )
->
+p( "Test#12" )
+p( "program is:", program asCode )

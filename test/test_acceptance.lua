@@ -37,6 +37,12 @@ function setup()
 
 end
 
+function teardown()
+package.loaded.parser  = nil
+package.loaded.core    = nil
+package.loaded.runtime = nil
+end
+
 function makeAcceptance( testName )
 	return function()
 		io.input( "test/acceptance/".. testName..".mab" )
@@ -63,7 +69,7 @@ function makeAcceptance( testName )
 end
 
 for i,testName in ipairs(tests) do
-	_M["test_"..testName] = makeAcceptance( testName )
+	_M["test"..testName] = makeAcceptance( testName )
 end
 
 

@@ -31,6 +31,15 @@ end )
 Object.toString = createLuaFunc( function( context ) -- Object#toString
 	local theIntrinsicName = rawget(context.self, "__name")
 	if theIntrinsicName then
+		return theIntrinsicName
+	else
+		return runtime.string[ string.format( "<%s instance>", runtime.luastring[ context.self.__name ] ) ]
+	end
+end )
+
+Object.asCode = createLuaFunc( function( context ) -- Object#asCode
+	local theIntrinsicName = rawget(context.self, "__name")
+	if theIntrinsicName then
 		return runtime.string[ string.format("%s (0x%04x)", runtime.luastring[theIntrinsicName], runtime.ObjectId[ context.self ] ) ]
 	else
 		return runtime.string[ string.format( "<%s instance (0x%04x)>", runtime.luastring[ context.self.__name ], runtime.ObjectId[ context.self ] ) ]
