@@ -1,6 +1,5 @@
 local setmetatable=setmetatable
 local _G=_G
-local __realprint = print
 module( 'lunity' )
 
 local lunity = _M
