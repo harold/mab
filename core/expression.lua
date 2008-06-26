@@ -3,7 +3,7 @@ Expression = runtime.childFrom( Array, "Expression" )
 Expression.new = createLuaFunc( function( context ) -- Expression#new
 	-- Re-use existing expression created for the first chunk argument, if available
 	local args = context.message.arguments
-	local theExpression = args[1] and args[1][1] or executeFunction( Object.new, context.self, messageCache['new'] )
+	local theExpression = args[1] ~= Lawn['nil'] and args[1][1] or executeFunction( Object.new, context.self, messageCache['new'] )
 	theExpression.creationContext = context.owningContext
 	return theExpression
 end )
