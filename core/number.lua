@@ -12,15 +12,9 @@ setmetatable( runtime.number, {
 } )
 
 Number['+'] = createLuaFunc( 'addend', function( context ) -- Number#+
-	--local myValue = runtime.luanumber[ context.self ]
-	--local nextValue = runtime.luanumber[ context.message.next ]
-	--context.nextMessage = context.message.next.next
-	--print( myValue + nextValue )
-	local lvalue, rvalue
-	lvalue = runtime.luanumber[ context.self ]
-	if context.addend ~= Lawn['nil'] then
-		rvalue = runtime.luanumber[ context.addend ]
-	else
+	local lvalue = runtime.luanumber[ context.self ]
+	local rvalue = runtime.luanumber[ context.addend ]
+	if not rvalue then
 		local theNextMessageOrLiteral = context.message.next
 		if theNextMessageOrLiteral == Lawn['nil'] then
 			error( "Number#+ is missing an addend" )
@@ -32,11 +26,16 @@ Number['+'] = createLuaFunc( 'addend', function( context ) -- Number#+
 end )
 
 Number['-'] = createLuaFunc( 'subtrahend', function( context ) -- Number#-
-	--local myValue = runtime.luanumber[ context.self ]
-	--local nextValue = runtime.luanumber[ context.message.next ]
-	--print( myValue + nextValue )
 	local lvalue = runtime.luanumber[ context.self ]
 	local rvalue = runtime.luanumber[ context.subtrahend ]
+	if not rvalue then
+		local theNextMessageOrLiteral = context.message.next
+		if theNextMessageOrLiteral == Lawn['nil'] then
+			error( "Number#- is missing a subtrahend" )
+		end
+		context.owningContext.nextMessage = theNextMessageOrLiteral.next
+		rvalue = runtime.luanumber[ sendMessage( context.owningContext, theNextMessageOrLiteral ) ]
+	end
 	return runtime.number[ lvalue - rvalue ]
 end )
 
@@ -55,12 +54,28 @@ end )
 Number['*'] = createLuaFunc( 'multiplicand', function( context ) -- Number#*
 	local lvalue = runtime.luanumber[ context.self ]
 	local rvalue = runtime.luanumber[ context.multiplicand ]
+	if not rvalue then
+		local theNextMessageOrLiteral = context.message.next
+		if theNextMessageOrLiteral == Lawn['nil'] then
+			error( "Number#* is missing a multiplicand" )
+		end
+		context.owningContext.nextMessage = theNextMessageOrLiteral.next
+		rvalue = runtime.luanumber[ sendMessage( context.owningContext, theNextMessageOrLiteral ) ]
+	end
 	return runtime.number[ lvalue * rvalue ]
 end )
 
 Number['/'] = createLuaFunc( 'divisor', function( context ) -- Number#/
 	local lvalue = runtime.luanumber[ context.self ]
 	local rvalue = runtime.luanumber[ context.divisor ]
+	if not rvalue then
+		local theNextMessageOrLiteral = context.message.next
+		if theNextMessageOrLiteral == Lawn['nil'] then
+			error( "Number#/ is missing a divisor" )
+		end
+		context.owningContext.nextMessage = theNextMessageOrLiteral.next
+		rvalue = runtime.luanumber[ sendMessage( context.owningContext, theNextMessageOrLiteral ) ]
+	end
 	return runtime.number[ lvalue / rvalue ]
 end )
 
