@@ -21,6 +21,9 @@ Context.method = createLuaFunc( function( context ) -- Context#method
 end )
 
 Context['while'] = createLuaFunc( function( context ) -- Context#while
+	if #context.message.arguments ~= 2 then
+		error( "while requires 2 arguments" )
+	end
 	local conditionChunk = context.message.arguments[ 1 ]
 	local clauseChunk		 = context.message.arguments[ 2 ]
 	local contextOfWhile = context.self

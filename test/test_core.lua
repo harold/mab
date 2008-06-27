@@ -47,4 +47,13 @@ function test1_chunks_and_things()
 	-- TODO: test adding an existing child to another location (should remove from original first)
 end
 
+function test2_while()
+	-- While requires 2 arguments
+	local mabFalse = core.Lawn['false']
+	assertErrors( core.sendMessageAsString, core.Lawn, 'while' )
+	assertErrors( core.sendMessageAsString, core.Lawn, 'while', mabFalse )
+	assertDoesNotError( core.sendMessageAsString, core.Lawn, 'while', mabFalse, mabFalse )
+	assertErrors( core.sendMessageAsString, core.Lawn, 'while', mabFalse, mabFalse, mabFalse )
+end
+
 runTests()
