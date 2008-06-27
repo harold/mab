@@ -21,3 +21,9 @@ Lawn['nil']     = runtime.childFrom( Object,  "nil (the object)" )
 runtime.Meta.nilValue    = Lawn['nil']
 
 Function.executeOnAccess = Lawn['true']
+
+Lawn['nil']['or'] = createLuaFunc( 'rValue', function( context ) 
+	return context.rValue
+end )
+
+Lawn['false']['or'] = Lawn['nil']['or']

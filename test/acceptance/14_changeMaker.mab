@@ -1,0 +1,17 @@
+setSlot( 'coins', Array new(1, 5, 10) )
+setSlot( 'countChange', method( amount,
+	cc( amount, coins size ) 
+))
+
+setSlot( 'cc', method( amount, kindsOfCoins,
+	if( amount ==(0), 
+			1,
+			if( amount <(0) or( kindsOfCoins ==(0) ), 
+				0,
+				cc( amount, kindsOfCoins - 1 ) +( cc( amount -( coins at(kindsOfCoins) ), kindsOfCoins ) )
+			)
+		)
+	)
+)
+
+p( countChange( 10 ) )
