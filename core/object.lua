@@ -46,3 +46,6 @@ Object.asCode = createLuaFunc( function( context ) -- Object#asCode
 	end
 end )
 
+Object['or'] = createLuaFunc ( function( context ) -- Object#or
+	return context.self
+end )

@@ -1,3 +1,12 @@
+Array.new = createLuaFunc( function( context) -- Array#new
+	local args = context.message.arguments
+	local theArray = runtime.childFrom( Array )
+	for i=1, #args do
+		theArray[i] = evaluateChunk( args[i], context.owningContext )
+	end
+	return theArray
+end )
+
 Array.push = createLuaFunc( function( context ) -- Array#push
 	local args = context.message.arguments
 	local theOldSize = #context.self
@@ -51,4 +60,16 @@ Array.eachWithIndex = createLuaFunc( function( context ) -- Array#eachWithIndex
 			evaluateExpression( v, context )
 		end
 	end
+end )
+
+Array.toString = createLuaFunc( function( context ) -- Array#toString
+	local theString = "Array new("
+	for i,v in ipairs(context.self) do
+		theString = theString .. tostring(v) 
+		if i ~= #context.self then
+			theString = theString .. ", "
+		end
+	end
+	theString = theString .. ")"
+	return runtime.string[theString]
 end )

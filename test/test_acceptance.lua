@@ -20,7 +20,8 @@ tests = {
 	"11_eval",
 	"12_program",
 	"13_sieve",
-	"13b_arraySieve"
+	"13b_arraySieve",
+	"14_changeMaker"
 }
 
 function setup()
