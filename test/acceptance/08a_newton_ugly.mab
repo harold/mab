@@ -2,7 +2,7 @@ p( "Test#8a" )
 setSlot( "mySqrt", method( x,
 
 	setSlot( "goodEnough", method( guess,
-		guess *( guess ) -( x ) abs <( 0.0000000001 )
+		guess *( guess ) -( x ) abs <( 0.0001 )
 	) )
 	
 	setSlot( "improve", method( guess,
