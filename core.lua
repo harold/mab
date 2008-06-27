@@ -106,6 +106,7 @@ function sendMessage( receiver, messageOrLiteral )
 		-- TODO: Warning about literals sent as message if the receiver isn't a context
 		return messageOrLiteral
 	end
+
 	local messageName = runtime.luastring[ messageOrLiteral.identifier ]
 	local obj = receiver[ messageName ]
 	if obj == Lawn['nil'] then
@@ -135,6 +136,7 @@ function executeFunction( functionObject, receiver, message )
 	-- Setup local parameters
 	-- TODO: syntax to allow eval of chunks to be optional
 	if functionObject.namedArguments ~= Lawn['nil'] then
+		local theNextMessageInOwningContext = owningContext.nextMessage
 		for i=1,#functionObject.namedArguments do
 			-- TODO: warn if this conflicts, or maybe don't shove locals onto the context, but inherit the context from locals
 			local theArgName = runtime.luastring[ functionObject.namedArguments[i] ]
@@ -145,6 +147,7 @@ function executeFunction( functionObject, receiver, message )
 				context[ theArgName ] = Lawn['nil']
 			end
 		end
+		owningContext.nextMessage = theNextMessageInOwningContext
 	end
 
 	return evaluateChunk( functionObject, context )
