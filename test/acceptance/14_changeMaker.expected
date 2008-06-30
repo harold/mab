@@ -1,14 +1,27 @@
 cc( 3, 2, -, 0 )
-cc( 3, 1, a, 1 )
-cc( 3, 0, a, 2 )
-cc( 2, 1, b, 2 )
-cc( 2, 0, a, 3 )
-cc( 1, 1, b, 3 )
-cc( 1, 0, a, 4 )
-cc( 0, 1, b, 4 )
-cc( 1, 2, b, 1 )
-cc( 1, 1, a, 2 )
-cc( 1, 0, a, 3 )
-cc( 0, 1, b, 3 )
-cc( -1, 2, b, 2 )
+  cc( 3, 1, a, 1 )
+    cc( 3, 0, a, 2 )
+    ...returning 0
+    cc( 2, 1, b, 2 )
+      cc( 2, 0, a, 3 )
+      ...returning 0
+      cc( 1, 1, b, 3 )
+        cc( 1, 0, a, 4 )
+        ...returning 0
+        cc( 0, 1, b, 4 )
+        ...returning 1
+      ...returning 1
+    ...returning 1
+  ...returning 1
+  cc( 1, 2, b, 1 )
+    cc( 1, 1, a, 2 )
+      cc( 1, 0, a, 3 )
+      ...returning 0
+      cc( 0, 1, b, 3 )
+      ...returning 1
+    ...returning 1
+    cc( -1, 2, b, 2 )
+    ...returning 0
+  ...returning 1
+...returning 2
 2

@@ -1,18 +1,20 @@
-setSlot( 'coins', Array new(1, 2) )
+setSlot( 'coins', Array new( 1, 2 ) )
 setSlot( 'countChange', method( amount,
 	cc( amount, coins size, "-", 0 ) 
 ))
 
-setSlot( 'cc', method( amount, kindsOfCoins, branch, depth, 
-	p( "cc( #{amount}, #{kindsOfCoins}, #{branch}, #{depth} )" interpolate )
-	if( amount ==(0), 
-			1,
-			if( amount <(0) or( kindsOfCoins ==(0) ), 
-				0,
-				cc( amount, kindsOfCoins -( 1 ), "a", depth +( 1 ) ) +( cc( amount -( coins at(kindsOfCoins) ), kindsOfCoins, "b", depth+( 1 ) ) )
-			)
+setSlot( 'cc', method( amount, kindsOfCoins, branch, depth,
+	setSlot( "indent", "  " *( depth ) )
+	p( indent +( "cc( #{amount}, #{kindsOfCoins}, #{branch}, #{depth} )" interpolate ) )
+	setSlot( "returnValue", if( amount ==(0), 
+		1,
+		if( amount <(0) or( kindsOfCoins ==(0) ), 
+			0,
+			cc( amount, kindsOfCoins -( 1 ), "a", depth +( 1 ) ) +( cc( amount -( coins at(kindsOfCoins) ), kindsOfCoins, "b", depth+( 1 ) ) )
 		)
-	)
-)
+	))
+	p( indent +( "...returning #{returnValue}" interpolate ) )
+	returnValue
+))
 
 p( countChange( 3 ) )
