@@ -84,6 +84,16 @@ Number.abs = createLuaFunc( function( context ) -- Number#abs
 	return runtime.number[ math.abs( myValue ) ]
 end )
 
+Number['sin'] = createLuaFunc( function( context ) -- Number#sin
+	local myValue = runtime.luanumber[ context.self ]
+	return runtime.number[ math.sin(math.rad( myValue )) ]
+end )
+
+Number['cos'] = createLuaFunc( function( context ) -- Number#cos
+	local myValue = runtime.luanumber[ context.self ]
+	return runtime.number[ math.cos(math.rad( myValue )) ]
+end )
+
 Number.toString = createLuaFunc( function( context ) -- Number#toString
 	local theIntrinsicName = rawget( context.self, '__name' )
 	if theIntrinsicName then
