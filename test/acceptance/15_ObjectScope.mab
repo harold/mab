@@ -1,0 +1,6 @@
+setSlot( 'foo', Object new )
+foo setSlot( 'printX', method( p(x) ) )
+
+setSlot( 'x', 1 )
+foo setSlot( 'x', 2 )
+foo printX

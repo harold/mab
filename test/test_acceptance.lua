@@ -21,7 +21,8 @@ tests = {
 	"12_program",
 	"13_sieve",
 	"13b_arraySieve",
-	"14_changeMaker"
+	"14_changeMaker",
+	"15_ObjectScope"
 }
 
 function setup()
