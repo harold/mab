@@ -18,7 +18,7 @@ if not arg.sourcefile then
 end
 
 USAGE = [[
-usage: mab [-h] [-e] [-d debugLevel] [-p] [-i] [sourcefile.mab]
+Usage: mab [-h] [-e] [-d debugLevel] [-p] [-i] [sourcefile.mab]
        -h,--help          show this usage message
        -e,--examples      show some help examples
        -d,--debugLevel    the verbosity of debug messages to show
@@ -33,20 +33,20 @@ usage: mab [-h] [-e] [-d debugLevel] [-p] [-i] [sourcefile.mab]
 
 EXAMPLES  = [[
 Examples:
-  mab helloworld.mab
-  # Run helloworld.mab
-  
-  mab -p helloworld.mab
-  # Run helloworld.mab and show profiling information about the program
-  
-  mab -d 2 helloworld.mab
-  # Run helloworld.mab and with debug errors and warnings shown.
-  
-  mab
-  # Run map in interactive mode
-  
-  mab -i mylibrary.mab
-  # Run mylibrary.mab and then enter the interactive mode
+       mab helloworld.mab
+       # Run helloworld.mab
+       
+       mab --profile helloworld.mab
+       # Run helloworld.mab and show profiling information about the program
+       
+       mab -d 2 helloworld.mab
+       # Run helloworld.mab and with debug errors and warnings shown
+       
+       mab
+       # Run mab in interactive mode
+       
+       mab -i mylibrary.mab
+       # Run mylibrary.mab and then enter the interactive mode
 ]]
 
 if arg.help or arg.examples then
