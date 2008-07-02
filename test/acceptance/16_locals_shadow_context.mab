@@ -3,3 +3,5 @@ setSlot( "go", method(
   setSlot( "self", 42 )
   p( self )
 ) )
+
+go
