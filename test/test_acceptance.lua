@@ -22,7 +22,8 @@ tests = {
 	"13_sieve",
 	"13b_arraySieve",
 	"14_changeMaker",
-	"15_ObjectScope"
+	"15_ObjectScope",
+	"16_locals_shadow_context"
 }
 
 function setup()

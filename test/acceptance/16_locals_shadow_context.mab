@@ -1,0 +1,5 @@
+setSlot( "go", method(
+  p( self )
+  setSlot( "self", 42 )
+  p( self )
+) )

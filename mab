@@ -1,0 +1,107 @@
+#!/usr/bin/env lua
+
+require 'args'
+local success = args.processArguments{
+	unnamed  = { 'sourcefile' },
+	named    = { 'debugLevel', 'help', 'profile', 'interactive', 'examples' },
+	flags    = { 'help', 'profile', 'interactive', 'examples' },
+	numbers  = { 'debugLevel' },
+	required = { }
+}
+
+if not success then
+	arg.help = true
+end
+
+if not arg.sourcefile then
+	arg.interactive = true
+end
+
+USAGE = [[
+usage: mab [-h] [-e] [-d debugLevel] [-p] [-i] [sourcefile.mab]
+       -h,--help          show this usage message
+       -e,--examples      show some help examples
+       -d,--debugLevel    the verbosity of debug messages to show
+                          0 = no debug messages (the default)
+                          1 = non-fatal errors only
+                          2 = ...plus warnings
+                          3 = ...plus info
+                          4 = ...plus trivial notes
+       -p,--profile       show profile statistics after running the code
+       -i,--interactive   enter interactive mode (read/evaluate/print loop)
+]]
+
+EXAMPLES  = [[
+Examples:
+  mab helloworld.mab
+  # Run helloworld.mab
+  
+  mab -p helloworld.mab
+  # Run helloworld.mab and show profiling information about the program
+  
+  mab -d 2 helloworld.mab
+  # Run helloworld.mab and with debug errors and warnings shown.
+  
+  mab
+  # Run map in interactive mode
+  
+  mab -i mylibrary.mab
+  # Run mylibrary.mab and then enter the interactive mode
+]]
+
+if arg.help or arg.examples then
+	print( USAGE )
+	if arg.examples then
+		print( EXAMPLES )
+	end
+	os.exit( )
+end
+
+
+require 'parser'
+
+if arg.sourcefile then
+	if not string.find( arg.sourcefile, "\.mab$" ) then
+		print( "Warning: Source file '"..(arg.sourcefile).."' does not end in .mab" )
+	end
+
+	io.input( arg.sourcefile )
+	local code = io.read("*a")
+
+	LastCoreObjectIndex = #runtime.ObjectById
+	core.Lawn.program = parser.parse( code )
+	LastParsedObjectIndex = #runtime.ObjectById
+	core.evaluateChunk( core.Lawn.program )
+	LastRuntimeObjectIndex = #runtime.ObjectById
+end
+
+if arg.interactive then
+	print( "Error: Interactive mode not implemented yet" )
+	os.exit( )
+end
+
+if arg.profile then
+	print( string.rep("=",70) )
+	print( LastCoreObjectIndex.." core objects:" )
+	print( string.rep("-",70) )
+	for id=1,LastCoreObjectIndex do
+		print(id,runtime.ObjectById[id])
+	end
+
+	print( string.rep("=",70) )
+	print( (LastParsedObjectIndex-LastCoreObjectIndex).." objects created during parsing:" )
+	print( string.rep("-",70) )
+	for id=LastCoreObjectIndex+1,LastParsedObjectIndex do
+		print(id,runtime.ObjectById[id])
+	end
+
+	print( string.rep("=",70) )
+	print( (LastRuntimeObjectIndex-LastParsedObjectIndex).." objects created at runtime:" )
+	print( string.rep("-",70) )
+	for id=LastParsedObjectIndex+1,LastRuntimeObjectIndex do
+		print(id,runtime.ObjectById[id])
+	end
+	
+	-- print( string.rep("-",70) )
+	-- print( "Additional objects created to show this info: "..(#runtime.ObjectById - LastRuntimeObjectIndex) )
+end
