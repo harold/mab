@@ -1,8 +1,8 @@
 setSlot( "debugEval", method(
-	message arguments each( chunk,
+	callState message arguments each( chunk,
 		p( "#{chunk asCode} = #{chunk eval}" interpolate )
 	)
 ) )
 setSlot( "a", 40 )
-setSlot( "b", 2 )
+setSlot( "b", 2  )
 debugEval( a+b, a-b, a*b, a/b )

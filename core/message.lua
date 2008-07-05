@@ -1,30 +1,30 @@
-Message = runtime.childFrom( Object, "Message" )
+Roots.Message = runtime.childFrom( Roots.Object, "Message" )
 
-Message.new = createLuaFunc( "identifier", function( context ) -- Message#new
-	-- TODO: perhaps stop trying to be so DRY and just runtime.childFrom( Message )
-	local theMessage = executeFunction( Object.new, context.self, messageCache['new'] )
-	if context.identifier ~= Lawn['nil'] then
+Roots.Message.new = createLuaFunc( "identifier", function( context ) -- Message#new
+	-- TODO: perhaps stop trying to be so DRY and just runtime.childFrom( Roots.Message )
+	local theMessage = executeFunction( Roots.Object.new, context.self, messageCache['new'] )
+	if context.identifier ~= Roots['nil'] then
 		theMessage.identifier = context.identifier
 	end
 
-	theMessage.arguments = sendMessageAsString( ArgList, 'new' )
+	theMessage.arguments = sendMessageAsString( Roots.ArgList, 'new' )
 	-- Hard-set values to allow currying
 	-- TODO: perhaps allow storing as chunks in the future?
-	local args = context.message.arguments
+	local args = context.callState.message.arguments
 	for i=2, #args do
-		theMessage.arguments[i-1] = createChunk( createExpression( evaluateChunk( args[i], context.owningContext ) ) )
+		theMessage.arguments[i-1] = createChunk( createExpression( evaluateChunk( args[i], context.callState.callingContext ) ) )
 	end
 	
 	return theMessage
 end )
 
-Message.addArgument = createLuaFunc( "inArgValue", function( context ) -- Message#addArgument
+Roots.Message.addArgument = createLuaFunc( "inArgValue", function( context ) -- Message#addArgument
 	local args = context.self.arguments
 	args[ #args + 1 ] = createChunk( createExpression( context.inArgValue ) )
 	return runtime.number[ #args ]
 end )
 
-Message.asCode = createLuaFunc( function( context ) -- Message#asCode
+Roots.Message.asCode = createLuaFunc( function( context ) -- Message#asCode
 	local theResult	 
 	local theIntrinsicName = rawget( context.self, '__name' )
 	if theIntrinsicName then
@@ -44,7 +44,7 @@ Message.asCode = createLuaFunc( function( context ) -- Message#asCode
 	return theResult
 end )
 
-Message.toString = createLuaFunc( function( context ) -- Message#toString
+Roots.Message.toString = createLuaFunc( function( context ) -- Message#toString
 	local theIntrinsicName = rawget( context.self, '__name' )
 	if theIntrinsicName then
 		return runtime.string[ string.format("%s (0x%04x)", runtime.luastring[theIntrinsicName], runtime.ObjectId[ context.self ] ) ]

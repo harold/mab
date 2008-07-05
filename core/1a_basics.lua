@@ -29,10 +29,24 @@ end
 
 Object.__name = runtime.string["Object"]
 String.__name = runtime.string["String"]
+Roots = runtime.childFrom( Object, "Roots" )
+Roots.Object = Object
+Roots.String = String
+Roots.Roots  = Roots
 
-Array    = runtime.childFrom( Object, "Array" )
-Chunk    = runtime.childFrom( Array, "Chunk" )
-Function = runtime.childFrom( Chunk, "Function" )
+Roots.Array     = runtime.childFrom( Roots.Object, "Array"     )
+Roots.Chunk     = runtime.childFrom( Roots.Array,  "Chunk"     ) 
+Roots.Function  = runtime.childFrom( Roots.Chunk,  "Function"  )
+Roots.CallState = runtime.childFrom( Roots.Object, "CallState" )
 
-Context  = runtime.childFrom( Object, "Context" ) -- aka "Locals"
-Lawn     = runtime.childFrom( Context, "Lawn" )
+Roots.Context   = runtime.childFrom( Roots.Object,  "Context"  )
+Roots.Lawn      = runtime.childFrom( Roots.Context, "Lawn"     )
+
+--TODO: Should this really inherit from object, or not?
+Roots['nil'] = runtime.childFrom( Roots.Object, "nil (the object)" )
+Roots['nil']['or'] = createLuaFunc( 'rValue', function( context ) 
+	return context.rValue
+end )
+
+runtime.Meta.nilValue = Roots['nil']
+

@@ -120,18 +120,18 @@ function codeFromAST( t )
 	end
 end
 
-core.String.interpolate = core.createLuaFunc( function( context )
+core.Roots.String.interpolate = core.createLuaFunc( function( context )
 	local str = runtime.luastring[ context.self ]
 	str = string.gsub( str, "#(%b{})", function( chunkWithBrackets )
 		local chunk = parse( string.sub( chunkWithBrackets, 2, -2 ) )
-		local value = core.evaluateChunk( chunk, context.owningContext )
+		local value = core.evaluateChunk( chunk, context.callState.callingContext )
 		return core.toLuaString( value )
 	end)
 	return runtime.string[ str ]
 end )
 
 function runString( code )
-	core.Lawn.program = parser.parse( code )
-	core.evaluateChunk( core.Lawn.program )
+	core.Roots.Lawn.program = parser.parse( code )
+	core.evaluateChunk( core.Roots.Lawn.program )
 	-- TODO: error codes
 end

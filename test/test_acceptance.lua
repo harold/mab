@@ -23,20 +23,21 @@ tests = {
 	"13b_arraySieve",
 	"14_changeMaker",
 	"15_ObjectScope",
-	"16_locals_shadow_context"
+	"16_locals_shadow_context",
+	"17_scope_resolution"
 }
 
 function setup()
 	require 'parser'
 	
 	runtime.stdout = ""
-	core.Context.p = core.createLuaFunc( function( context )
-		local args = context.message.arguments
+	core.Roots.Context.p = core.createLuaFunc( function( context )
+		local args = context.callState.message.arguments
 		for i=1, #args do
-			local theExpressionValue = core.evaluateChunk( args[i], context.owningContext )
+			local theExpressionValue = core.evaluateChunk( args[i], context.callState.callingContext )
 			runtime.stdout = runtime.stdout .. core.toLuaString(theExpressionValue) .. "\n"
 		end
-		return core.Lawn['nil']
+		return core.Roots['nil']
 	end )
 
 end

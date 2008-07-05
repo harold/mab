@@ -12,7 +12,7 @@ function teardown()
 end
 
 function test1_chunks_and_things()
-	local nilObject = core.Lawn['nil']
+	local nilObject = core.Roots['nil']
 
   local c0 = core.createChunk()
 	assertEqual( #c0, 0 )
@@ -49,11 +49,12 @@ end
 
 function test2_while()
 	-- While requires 2 arguments
-	local mabFalse = core.Lawn['false']
-	assertErrors( core.sendMessageAsString, core.Lawn, 'while' )
-	assertErrors( core.sendMessageAsString, core.Lawn, 'while', mabFalse )
-	assertDoesNotError( core.sendMessageAsString, core.Lawn, 'while', mabFalse, mabFalse )
-	assertErrors( core.sendMessageAsString, core.Lawn, 'while', mabFalse, mabFalse, mabFalse )
+	local mabFalse = core.Roots['false']
+	local lawn     = core.Roots.Lawn	
+	assertErrors( core.sendMessageAsString, lawn, 'while' )
+	assertErrors( core.sendMessageAsString, lawn, 'while', mabFalse )
+	assertDoesNotError( core.sendMessageAsString, lawn, 'while', mabFalse, mabFalse )
+	assertErrors( core.sendMessageAsString, lawn, 'while', mabFalse, mabFalse, mabFalse )
 end
 
 runTests()

@@ -1,45 +1,45 @@
-Array.new = createLuaFunc( function( context) -- Array#new
-	local args = context.message.arguments
-	local theArray = runtime.childFrom( Array )
+Roots.Array.new = createLuaFunc( function( context) -- Array#new
+	local args = context.callState.message.arguments
+	local theArray = runtime.childFrom( Roots.Array )
 	for i=1, #args do
-		theArray[i] = evaluateChunk( args[i], context.owningContext )
+		theArray[i] = evaluateChunk( args[i], context.callState.callingContext )
 	end
 	return theArray
 end )
 
-Array.push = createLuaFunc( function( context ) -- Array#push
-	local args = context.message.arguments
+Roots.Array.push = createLuaFunc( function( context ) -- Array#push
+	local args = context.callState.message.arguments
 	local theOldSize = #context.self
 	for i=1, #args do
-		local theExpressionValue = evaluateChunk( args[i], context.owningContext )
+		local theExpressionValue = evaluateChunk( args[i], context.callState.callingContext )
 		context.self[ theOldSize + i ] = theExpressionValue
 	end
 end )
 
-Array.at = createLuaFunc( 'index', function( context ) --Array#at
+Roots.Array.at = createLuaFunc( 'index', function( context ) -- Array#at
 	return context.self[ runtime.luanumber[context.index] ]
 end)
-Array.atPut = createLuaFunc( 'index', 'value', function( context ) -- Array#atPut
+Roots.Array.atPut = createLuaFunc( 'index', 'value', function( context ) -- Array#atPut
 	-- TODO: HH - holycrap error checking
 	context.self[ runtime.luanumber[context.index] ] = context.value
 end)
 
-Array.size = createLuaFunc( function( context ) -- Array#size
+Roots.Array.size = createLuaFunc( function( context ) -- Array#size
 	return runtime.number[ #context.self ]
 end)
 
-Array.join = createLuaFunc( 'separator', function( context ) -- Array#join
+Roots.Array.join = createLuaFunc( 'separator', function( context ) -- Array#join
 	local theMessages = {}
 	for i,message in ipairs(context.self) do
 		theMessages[i] = toObjString( message )
 	end
-	local theSeparator = context.separator ~= Lawn['nil'] and toLuaString( context.separator ) or runtime.luastring[ ' ' ]
+	local theSeparator = context.separator ~= Roots['nil'] and toLuaString( context.separator ) or runtime.luastring[ ' ' ]
 	return runtime.string[ table.concat( theMessages, theSeparator ) ]
 end )
 
 -- TODO: holycrap these are brutal.
-Array.each = createLuaFunc( function( context ) -- Array#each
-	local args = context.message.arguments
+Roots.Array.each = createLuaFunc( function( context ) -- Array#each
+	local args = context.callState.message.arguments
 	for i,v in ipairs(context.self) do
 	  -- What could possibly go wrong?
 		context[ runtime.luastring[args[1][1][1].identifier] ] = v
@@ -49,8 +49,8 @@ Array.each = createLuaFunc( function( context ) -- Array#each
 	end
 end )
 
-Array.eachWithIndex = createLuaFunc( function( context ) -- Array#eachWithIndex
-	local args = context.message.arguments
+Roots.Array.eachWithIndex = createLuaFunc( function( context ) -- Array#eachWithIndex
+	local args = context.callState.message.arguments
 	for i,v in ipairs(context.self) do
 	  -- What could possibly go wrong?
 		context[ runtime.luastring[args[1][1][1].identifier] ] = v
@@ -62,7 +62,7 @@ Array.eachWithIndex = createLuaFunc( function( context ) -- Array#eachWithIndex
 	end
 end )
 
-Array.toString = createLuaFunc( function( context ) -- Array#toString
+Roots.Array.toString = createLuaFunc( function( context ) -- Array#toString
 	local theString = "Array new("
 	for i,v in ipairs(context.self) do
 		theString = theString .. tostring(v) 

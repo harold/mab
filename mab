@@ -69,9 +69,9 @@ if arg.sourcefile then
 	local code = io.read("*a")
 
 	LastCoreObjectIndex = #runtime.ObjectById
-	core.Lawn.program = parser.parse( code )
+	core.Roots.Lawn.program = parser.parse( code )
 	LastParsedObjectIndex = #runtime.ObjectById
-	core.evaluateChunk( core.Lawn.program )
+	core.evaluateChunk( core.Roots.Lawn.program )
 	LastRuntimeObjectIndex = #runtime.ObjectById
 end
 

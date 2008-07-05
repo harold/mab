@@ -2,7 +2,7 @@ require 'runtime'
 module( 'core', package.seeall )
 
 function createChunk( ... )
-	local chunk = runtime.childFrom( Chunk )
+	local chunk = runtime.childFrom( Roots.Chunk )
 	if select('#',...) > 0 then
 		addChildren( chunk, ... )
 	end
@@ -10,7 +10,7 @@ function createChunk( ... )
 end
 
 function createExpression( ... )
-	local expression = runtime.childFrom( Expression )
+	local expression = runtime.childFrom( Roots.Expression )
 	if select('#',...) > 0 then
 		addChildren( expression, ... )
 	end
@@ -18,9 +18,9 @@ function createExpression( ... )
 end
 
 function createMessage( messageString, ... )
-	local message = runtime.childFrom( Message )
+	local message = runtime.childFrom( Roots.Message )
 	message.identifier = runtime.string[messageString]
-	message.arguments = runtime.childFrom( ArgList )
+	message.arguments = runtime.childFrom( Roots.ArgList )
 	if select('#',...) > 0 then
 		addChildren( message.arguments, ... )
 	end
@@ -42,10 +42,10 @@ function addChildren( parent, ... )
 end
 
 function createLuaFunc( ... )
-	local func = runtime.childFrom( Function )
+	local func = runtime.childFrom( Roots.Function )
 	
-	-- TODO: sendMessageAsString( Array, 'new' ) fails; perhaps too soon?
-	func.namedArguments = runtime.childFrom( Array )
+	-- FIXME: sendMessageAsString( Roots.Array, 'new' ) fails; perhaps too soon?
+	func.namedArguments = runtime.childFrom( Roots.Array )
 
 	local theNumArgs = select('#',...) - 1
 	for i=1,theNumArgs do
@@ -70,11 +70,11 @@ end
 -- ##########################################################################
 
 function evaluateChunk( chunk, context )
-	if not context then context = Lawn end
-	if chunk.__luaFunction ~= Lawn['nil'] then
-		return chunk.__luaFunction( context ) or Lawn['nil']
+	if not context then context = Roots.Lawn end
+	if chunk.__luaFunction ~= Roots['nil'] then
+		return chunk.__luaFunction( context ) or Roots['nil']
 	else
-		local lastValue = Lawn['nil']
+		local lastValue = Roots['nil']
 		for _,expression in ipairs(chunk) do
 			lastValue = evaluateExpression( expression, context )
 		end
@@ -85,13 +85,13 @@ end
 function evaluateExpression( expression, context )
 	--TODO: via setSlot as a message?
 	expression.context = context
-	if expression.creationContext == Lawn['nil'] then
+	if expression.creationContext == Roots['nil'] then
 		expression.creationContext = context
 	end
 
 	local receiver = context
 	context.nextMessage = expression[1]
-	while context.nextMessage ~= Lawn['nil'] do
+	while context.nextMessage ~= Roots['nil'] do
 		local theCurrentMessage = context.nextMessage
 		context.nextMessage = context.nextMessage.next
 		receiver = sendMessage( receiver, theCurrentMessage )
@@ -101,7 +101,7 @@ function evaluateExpression( expression, context )
 end
 
 function sendMessage( receiver, messageOrLiteral )
-	if messageOrLiteral.identifier == Lawn['nil'] then
+	if messageOrLiteral.identifier == Roots['nil'] then
 		-- Presumably this is a literal
 		-- TODO: Warning about literals sent as message if the receiver isn't a context
 		return messageOrLiteral
@@ -109,45 +109,51 @@ function sendMessage( receiver, messageOrLiteral )
 
 	local messageName = runtime.luastring[ messageOrLiteral.identifier ]
 	local obj = receiver[ messageName ]
-	if obj == Lawn['nil'] then
+
+	if obj == Roots['nil'] and messageName ~= 'nil' then
 		-- TODO: method_mising
-		-- FIXME: No need to error, just flow through to return Lawn.nil
-		error( "Cannot find message '"..tostring(messageName).."' on "..tostring(receiver) )
-	elseif obj.executeOnAccess ~= Lawn['nil'] then
+		-- FIXME: No need to error, just flow through to return Roots.nil
+		if arg.debugLevel and arg.debugLevel >= 1 then
+			print( "Warning: Cannot find message '"..tostring(messageName).."' on "..tostring(receiver) )
+		end
+	elseif obj.executeOnAccess ~= Roots['nil'] then
 		obj = executeFunction( obj, receiver, messageOrLiteral )
 	end
 
-	return obj or Lawn['nil']
+	return obj or Roots['nil']
 end
 
 function executeFunction( functionObject, receiver, message )
-	local owningContext = message.parent.context
-	if owningContext == Lawn['nil'] then
+	local callingContext = message.parent.context
+	if callingContext == Roots['nil'] then
 		-- if _DEBUG then print( "Warning: No message/expression context when sending '"..runtime.luastring[message.identifier].."'...so I'm using the Lawn instead.") end
-		owningContext = Lawn
+		callingContext = Roots.Lawn
 	end
 	
-	local context = runtime.childFrom( owningContext )
+	local context = runtime.childFrom( callingContext )
 	context.self = receiver
-	context.context = context
-	context.message = message
-	context.owningContext = owningContext
+	context.callState = runtime.childFrom( Roots.CallState )
+	context.callState.target  = receiver
+	context.callState.message = message
+	context.callState.context = context
+	context.callState['function'] = functionObject
+	context.callState.callingContext = callingContext
 	
 	-- Setup local parameters
 	-- TODO: syntax to allow eval of chunks to be optional
-	if functionObject.namedArguments ~= Lawn['nil'] then
-		local theNextMessageInOwningContext = owningContext.nextMessage
+	if functionObject.namedArguments ~= Roots['nil'] then
+		local theNextMessageInCallingContext = callingContext.nextMessage
 		for i=1,#functionObject.namedArguments do
 			-- TODO: warn if this conflicts, or maybe don't shove locals onto the context, but inherit the context from locals
 			local theArgName = runtime.luastring[ functionObject.namedArguments[i] ]
-			if message.arguments[i] ~= Lawn['nil'] then
-				context[ theArgName ] = evaluateChunk( message.arguments[i], owningContext )
+			if message.arguments[i] ~= Roots['nil'] then
+				context[ theArgName ] = evaluateChunk( message.arguments[i], callingContext )
 			else
-				if _DEBUG then print( "Warning: No argument passed for parameter '"..theArgName.."'; setting to Lawn.nil" ) end
-				context[ theArgName ] = Lawn['nil']
+				if _DEBUG then print( "Warning: No argument passed for parameter '"..theArgName.."'; setting to Roots.nil" ) end
+				context[ theArgName ] = Roots['nil']
 			end
 		end
-		owningContext.nextMessage = theNextMessageInOwningContext
+		callingContext.nextMessage = theNextMessageInCallingContext
 	end
 
 	return evaluateChunk( functionObject, context )
@@ -177,7 +183,7 @@ function sendMessageAsString( object, messageString, ... )
 	end
 	-- TODO: lookup via getSlot or sendMessage? (would allow warnings or errors to be single sourced)
 	local theFunction = object[messageString]
-	if theFunction == Lawn['nil'] then
+	if theFunction == Roots['nil'] then
 		error( "Cannot find '"..messageString.."' on "..tostring(object) )
 	end
 	return executeFunction( theFunction, object, theMessage )
@@ -212,16 +218,19 @@ lua_files = {
 	"arglist.lua",
 	"array.lua",
 	"boolean.lua",
-	"call.lua",
+	"callstate.lua",
 	"chunk.lua",
 	"context.lua",
 	"expression.lua",
 	"function.lua",
+	"lawn.lua",
 	"message.lua",
 	"number.lua",
 	"object.lua",
+	"ornaments.lua",
+	"roots.lua",
 	"string.lua",
-	"zz_lawn.lua"
+	"zz_finish.lua"
 }
 
 for _,fileName in ipairs(lua_files) do

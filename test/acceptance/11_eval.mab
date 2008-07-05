@@ -4,4 +4,4 @@ setSlot( "makeExpression", method( x,
 ) )
 setSlot( "x", 42 )
 setSlot( "myExp", makeExpression( 17 ) )
-p( myExp eval( Lawn ), myExp.eval( context ), myExp eval )
+p( myExp eval( Lawn ), myExp eval )

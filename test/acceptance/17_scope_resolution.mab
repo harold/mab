@@ -1,0 +1,25 @@
+setSlot( "Person", Object new )
+
+Person setSlot( "sayHi", method(
+	setSlot( "localFoo", "localFoo" )
+	Number setSlot( "soundOff", method(
+		p( self, self age, age, localFoo )
+	) )
+	p( age, self, self age, self fullName )
+	self age soundOff
+) )
+
+Person setSlot( "fullName", method(
+	setSlot( "myFirst", self first )
+	setSlot( "myLast",  self last )
+	myFirst +( " " ) +( myLast )
+) )
+
+setSlot( "gk", Person new )
+gk setSlot( "first", "Gavin"   )
+gk setSlot( "last",  "Kistner" )
+gk setSlot( "age",   35        )
+
+p( gk fullName, gk myFirst )
+gk sayHi
+p( gk fullName, gk myFirst )
