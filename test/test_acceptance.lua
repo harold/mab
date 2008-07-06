@@ -24,7 +24,7 @@ tests = {
 	"14_changeMaker",
 	"14b_changeMaker_simple",
 	"15_ObjectScope",
-	"15b_scoping",
+	"15b_SubtleObjectScope",
 	"16_locals_shadow_context",
 	"17_scope_resolution"
 }
