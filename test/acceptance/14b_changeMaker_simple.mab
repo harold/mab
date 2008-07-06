@@ -1,0 +1,15 @@
+setSlot( 'go', method( x, y, branch, depth,
+	setSlot( "indent", "  " *( depth ) )
+	p( indent +( "go( #{x}, #{y}, #{branch}, #{depth} )" interpolate ) )
+	setSlot( "returnValue", if( x ==( 0 ),
+		100,
+		if( y ==( 0 ),
+			1,
+			go( x, y -( 1 ), 'a', depth+( 1 ) ) +( go( x -( 1 ), 0, 'b', depth+( 1 ) ) )
+		)
+	))
+	p( indent +( "...returning #{returnValue}" interpolate ) )
+	returnValue
+))
+
+p( go( 1, 2, '-', 0 ) )
