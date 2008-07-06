@@ -23,6 +23,7 @@ tests = {
 	"13b_arraySieve",
 	"14_changeMaker",
 	"15_ObjectScope",
+	"15b_scoping",
 	"16_locals_shadow_context",
 	"17_scope_resolution"
 }

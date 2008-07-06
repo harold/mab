@@ -1,0 +1,4 @@
+setSlot( "Foo", Object new )
+Foo setSlot( "x", 42 )
+Foo setSlot( "go", method( p(x) ) )
+Foo go
