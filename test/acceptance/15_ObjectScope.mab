@@ -1,6 +1,11 @@
 setSlot( 'foo', Object new )
-foo setSlot( 'printX', method( p(x, self x) ) )
+foo setSlot( 'printX', method(
+	setSlot( 'x', 3 )
+	p( x, self x, callState callingContext x, y, self y )
+) )
 
 setSlot( 'x', 1 )
+setSlot( 'y', 0 )
 foo setSlot( 'x', 2 )
+foo setSlot( 'y', 42 )
 foo printX
