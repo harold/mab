@@ -11,7 +11,7 @@ Roots.String['*'] = createLuaFunc( 'reps', function( context ) -- String#*
 			error( "String#* is missing a repetition count" )
 		end
 		context.callState.callingContext.nextMessage = theNextMessageOrLiteral.next
-		rvalue = runtime.luanumber[ sendMessage( context.callState.callingContext, theNextMessageOrLiteral ) ]
+		rvalue = runtime.luanumber[ sendMessage( context.callState.callingContext, theNextMessageOrLiteral, context.callState.callingContext ) ]
 	end
 	return runtime.string[ string.rep( string, reps ) ]
 end )

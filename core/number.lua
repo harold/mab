@@ -20,7 +20,7 @@ Roots.Number['+'] = createLuaFunc( 'addend', function( context ) -- Number#+
 			error( "Number#+ is missing an addend" )
 		end
 		context.callState.callingContext.nextMessage = theNextMessageOrLiteral.next
-		rvalue = runtime.luanumber[ sendMessage( context.callState.callingContext, theNextMessageOrLiteral ) ]
+		rvalue = runtime.luanumber[ sendMessage( context.callState.callingContext, theNextMessageOrLiteral, context.callState.callingContext ) ]
 	end
 	return runtime.number[ lvalue + rvalue ]
 end )
@@ -34,7 +34,7 @@ Roots.Number['-'] = createLuaFunc( 'subtrahend', function( context ) -- Number#-
 			error( "Number#- is missing a subtrahend" )
 		end
 		context.callState.callingContext.nextMessage = theNextMessageOrLiteral.next
-		rvalue = runtime.luanumber[ sendMessage( context.callState.callingContext, theNextMessageOrLiteral ) ]
+		rvalue = runtime.luanumber[ sendMessage( context.callState.callingContext, theNextMessageOrLiteral, context.callState.callingContext ) ]
 	end
 	return runtime.number[ lvalue - rvalue ]
 end )
@@ -60,7 +60,7 @@ Roots.Number['*'] = createLuaFunc( 'multiplicand', function( context ) -- Number
 			error( "Number#* is missing a multiplicand" )
 		end
 		context.callState.callingContext.nextMessage = theNextMessageOrLiteral.next
-		rvalue = runtime.luanumber[ sendMessage( context.callState.callingContext, theNextMessageOrLiteral ) ]
+		rvalue = runtime.luanumber[ sendMessage( context.callState.callingContext, theNextMessageOrLiteral, context.callState.callingContext ) ]
 	end
 	return runtime.number[ lvalue * rvalue ]
 end )
@@ -74,7 +74,7 @@ Roots.Number['/'] = createLuaFunc( 'divisor', function( context ) -- Number#/
 			error( "Number#/ is missing a divisor" )
 		end
 		context.callState.callingContext.nextMessage = theNextMessageOrLiteral.next
-		rvalue = runtime.luanumber[ sendMessage( context.callState.callingContext, theNextMessageOrLiteral ) ]
+		rvalue = runtime.luanumber[ sendMessage( context.callState.callingContext, theNextMessageOrLiteral, context.callState.callingContext ) ]
 	end
 	return runtime.number[ lvalue / rvalue ]
 end )

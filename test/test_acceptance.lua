@@ -23,6 +23,7 @@ tests = {
 	"13b_arraySieve",
 	"14_changeMaker",
 	"14b_changeMaker_simple",
+	"14c_changeMaker_with_operators",
 	"15_ObjectScope",
 	"15b_SubtleObjectScope",
 	"16_locals_shadow_context",

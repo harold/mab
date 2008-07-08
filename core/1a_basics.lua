@@ -23,7 +23,7 @@ runtime.Meta.__tostring = function( object )
   elseif object == String then
     return runtime.luastring[object.__name]
   else
-  	return runtime.luastring[ sendMessage( object, messageCache['toString'] ) ]
+  	return runtime.luastring[ sendMessage( object, messageCache['toString'], Roots.Lawn ) ]
   end
 end
 
