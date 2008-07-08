@@ -25,6 +25,9 @@ function childFrom( parentObject, name )
 	end
 	local object = blank( name )
 	addInheritance( object, parentObject )
+	if arg.debugLevel and arg.debugLevel >= 4 and parentObject.__name then
+		print( "Created "..luastring[parentObject.__name].." #"..ObjectId[object] )
+	end
 	return object
 end
 
@@ -139,6 +142,7 @@ function isKindOf( object, ancestorObject )
 	return false
 end
 
+-- TODO: remove this, as no code is using it?
 -- Shallow duplicate preserving inheritance hierarchy
 function duplicate( object )
 	local duplicateObject = {}
@@ -156,3 +160,14 @@ function duplicate( object )
 	return duplicateObject
 end
 
+-- TODO: Remove (debug function)
+function showHier( obj, depth )
+	if not depth then depth = 0 end
+	local indent = ("  "):rep( depth )
+	print( indent .. luastring[ core.sendMessageAsString( obj, 'asCode' ) ] )
+	if AncestorsPerObject[ obj ] and obj ~= core.Roots.Lawn then
+		for i,ancestor in ipairs(AncestorsPerObject[obj]) do
+			showHier( ancestor, depth+1 )
+		end
+	end
+end

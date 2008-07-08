@@ -50,8 +50,8 @@ function createLuaFunc( ... )
 	local theNumArgs = select('#',...) - 1
 	for i=1,theNumArgs do
 		local theArgName = select(i,...)
+		-- TODO: remove check for speed?
 		if type(theArgName)~="string" then
-			-- TODO: remove for speed
 			error( "Argument #"..i.." to createLuaFunc() is "..tostring(theArgName))
 		end
 		func.namedArguments[i] = runtime.string[theArgName]
@@ -83,8 +83,7 @@ function evaluateChunk( chunk, context )
 end
 
 function evaluateExpression( expression, context )
-	--TODO: via setSlot as a message?
-	expression.context = context
+	-- FIXME: Shouldn't this be set by createExpression (defaulting to Lawn sometimes)?
 	if expression.creationContext == Roots['nil'] then
 		expression.creationContext = context
 	end
@@ -94,13 +93,13 @@ function evaluateExpression( expression, context )
 	while context.nextMessage ~= Roots['nil'] do
 		local theCurrentMessage = context.nextMessage
 		context.nextMessage = context.nextMessage.next
-		receiver = sendMessage( receiver, theCurrentMessage )
+		receiver = sendMessage( receiver, theCurrentMessage, context )
 	end
 		
 	return receiver
 end
 
-function sendMessage( receiver, messageOrLiteral )
+function sendMessage( receiver, messageOrLiteral, callingContext )
 	if messageOrLiteral.identifier == Roots['nil'] then
 		-- Presumably this is a literal
 		-- TODO: Warning about literals sent as message if the receiver isn't a context
@@ -117,16 +116,20 @@ function sendMessage( receiver, messageOrLiteral )
 			print( "Warning: Cannot find message '"..tostring(messageName).."' on "..tostring(receiver) )
 		end
 	elseif obj.executeOnAccess ~= Roots['nil'] then
-		obj = executeFunction( obj, receiver, messageOrLiteral )
+		obj = executeFunction( obj, receiver, messageOrLiteral, callingContext )
 	end
 
 	return obj or Roots['nil']
 end
 
-function executeFunction( functionObject, receiver, message )
-	local callingContext = message.parent.context
+function executeFunction( functionObject, receiver, message, callingContext )
 	if callingContext == Roots['nil'] then
-		-- if _DEBUG then print( "Warning: No message/expression context when sending '"..runtime.luastring[message.identifier].."'...so I'm using the Lawn instead.") end
+		if arg.debugLevel and arg.debugLevel >= 2 then
+			local messageString = runtime.luastring[message.identifier]
+			if messageString ~= 'toString' and messageString ~= 'asCode' then
+				print( "Warning: No message/expression context when sending '"..messageString.."'...so I'm using the Lawn instead." )
+			end
+		end
 		callingContext = Roots.Lawn
 	end
 	
@@ -144,12 +147,16 @@ function executeFunction( functionObject, receiver, message )
 	if functionObject.namedArguments ~= Roots['nil'] then
 		local theNextMessageInCallingContext = callingContext.nextMessage
 		for i=1,#functionObject.namedArguments do
-			-- TODO: warn if this conflicts, or maybe don't shove locals onto the context, but inherit the context from locals
 			local theArgName = runtime.luastring[ functionObject.namedArguments[i] ]
+			if arg.debugLevel and arg.debugLevel >= 2 and rawget( context, theArgName ) then
+				print( "Warning: overriding built in context property '"..theArgName.."'" )
+			end
 			if message.arguments[i] ~= Roots['nil'] then
 				context[ theArgName ] = evaluateChunk( message.arguments[i], callingContext )
 			else
-				if _DEBUG then print( "Warning: No argument passed for parameter '"..theArgName.."'; setting to Roots.nil" ) end
+				if arg.debugLevel and arg.debugLevel >= 3 then
+					print( "Warning: No argument passed for parameter '"..theArgName.."'; setting to Roots.nil" )
+				end
 				context[ theArgName ] = Roots['nil']
 			end
 		end
@@ -186,7 +193,7 @@ function sendMessageAsString( object, messageString, ... )
 	if theFunction == Roots['nil'] then
 		error( "Cannot find '"..messageString.."' on "..tostring(object) )
 	end
-	return executeFunction( theFunction, object, theMessage )
+	return executeFunction( theFunction, object, theMessage, Roots.Lawn )
 end
 
 -- ##########################################################################
@@ -196,7 +203,7 @@ function toObjString( object )
 		object = object.__name
 	elseif not runtime.isKindOf( object, String ) then
 		-- TODO: Perhaps replace test with a simple runtime.luastring[object], since every string object should have an entry here
-		object = sendMessage( object, messageCache['toString'] )
+		object = sendMessage( object, messageCache['toString'], Roots.Lawn )
 	end
 	-- TODO: Perhaps replace test with a simple runtime.luastring[object], since every string object should have an entry here
 	if runtime.isKindOf( object, String ) then
@@ -208,6 +215,75 @@ end
 
 function toLuaString( object )
 	return runtime.luastring[ toObjString(object) ]
+end
+
+-- ##########################################################################
+
+-- TODO: remove this debug function (or more to debug utils)
+function printObjectAsXML( object, depth, recursingFlag )
+	if not depth then depth = 0 end
+
+	if not recursingFlag then
+		print( "<!-- ################################################################ -->" )
+		_G.objectsPrinted = {}
+	end	
+	
+	local indent = string.rep( "  ", depth )
+
+	if runtime.luanumber[ object ] then
+		print( indent.."(N)"..runtime.luanumber[ object ] )
+		
+	elseif runtime.luastring[ object ] then
+		print( indent.."(S)"..string.sub( string.format("%q",runtime.luastring[object]), 2, -2 ) )
+		
+	else
+		local attrs = {}		
+		for attrName,attrObj in pairs(object) do
+			if not tonumber( attrName ) then
+				local valueString = (runtime.luanumber[ attrObj ] and ("(N)"..runtime.luanumber[attrObj])) or
+				                    (runtime.luastring[ attrObj ] and ("(S)"..string.sub( string.format("%q",runtime.luastring[attrObj]), 2, -2 ) ) ) or
+				                    ( runtime.ObjectId[ attrObj ] and string.format( "0x%04x", runtime.ObjectId[ attrObj ] ) ) or
+				                    tostring( attrObj )
+				attrs[ attrName ] = valueString
+			end
+		end
+		local objectName = runtime.luastring[ object.__name ]
+		if objectName == "Lawn" and object ~= Roots.Lawn then
+			objectName = "Context"
+		end
+		io.write( string.format( '%s<%s id="0x%04x"', indent, objectName, runtime.ObjectId[ object ] ) )
+		for attrName,valueString in pairs(attrs) do
+			io.write( " "..attrName..'="'..valueString..'"' )
+		end
+		
+		local objectShowingChildren = object
+		if runtime.isKindOf( object.arguments, Roots.ArgList ) then
+			objectShowingChildren = object.arguments
+			_G.objectsPrinted[ object.arguments ] = true
+		end
+		
+		if #objectShowingChildren > 0 then
+			print( ">" )
+			for _,childObj in ipairs(objectShowingChildren) do
+				printObjectAsXML( childObj, depth+1, true )
+			end
+			print( indent.."</"..runtime.luastring[ object.__name ]..">" )
+		else
+			print( " />" )
+		end
+	end
+	
+	_G.objectsPrinted[ object ] = true
+	
+	if not recursingFlag then
+		print( "<!-- ############### Referenced Objects ############### -->" )
+		for id,object in ipairs(runtime.ObjectById) do
+			if not _G.objectsPrinted[ object ] and not runtime.luastring[ object ] and not runtime.luanumber[ object ] then
+				printObjectAsXML( object, 0, true )
+			end
+		end
+		print( "<!-- ################################################################ -->" )
+	end
 end
 
 -- ##########################################################################
@@ -238,3 +314,4 @@ for _,fileName in ipairs(lua_files) do
 	setfenv( fileChunk, _M )
 	fileChunk( )
 end
+

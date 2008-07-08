@@ -2,7 +2,8 @@ Roots.Message = runtime.childFrom( Roots.Object, "Message" )
 
 Roots.Message.new = createLuaFunc( "identifier", function( context ) -- Message#new
 	-- TODO: perhaps stop trying to be so DRY and just runtime.childFrom( Roots.Message )
-	local theMessage = executeFunction( Roots.Object.new, context.self, messageCache['new'] )
+	-- ...or wait, why isn't this using createMessage()?
+	local theMessage = executeFunction( Roots.Object.new, context.self, messageCache['new'], context.callState.callingContext )
 	if context.identifier ~= Roots['nil'] then
 		theMessage.identifier = context.identifier
 	end
