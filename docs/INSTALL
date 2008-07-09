@@ -1,8 +1,12 @@
 ===============================================================================
 Installing Lua
 ===============================================================================
-  Download the Lua source from http://www.lua.org/ftp/
-  Follow the build instructions to build it.
+  Windows:
+  	http://luaforge.net/frs/?group_id=377
+  
+  Else:
+		Download the Lua source from http://www.lua.org/ftp/
+  	Follow the build instructions to build it.
 
 
 ===============================================================================
@@ -14,4 +18,4 @@ Installing LPEG
     export MACOSX_DEPLOYMENT_TARGET=10.3
     gcc -I../.. -Wall -O2 -bundle -undefined dynamic_lookup -o  lpeg.so lpeg.c
     sudo mv lpeg.so /usr/local/lib/lua/5.1/
-  
+
