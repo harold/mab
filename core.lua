@@ -219,12 +219,26 @@ end
 
 -- ##########################################################################
 
+function slurpNextValue( callState )
+	local theNextValue = callState.message.next
+	if theNextValue ~= Roots['nil'] then
+		callState.callingContext.nextMessage = theNextValue.next
+		if runtime.isKindOf( theNextValue, Roots.Expression ) then
+			theNextValue = evaluateExpression( theNextValue, callState.callingContext )
+		elseif runtime.isKindOf( theNextValue, Roots.Message ) then
+			theNextValue = sendMessage( callState.callingContext, theNextValue, callState.callingContext )
+		end
+	end
+	return theNextValue
+end
+
+-- ##########################################################################
+
 -- TODO: remove this debug function (or more to debug utils)
-function printObjectAsXML( object, depth, recursingFlag )
+function printObjectAsXML( object, showReferenced, depth, recursingFlag )
 	if not depth then depth = 0 end
 
 	if not recursingFlag then
-		print( "<!-- ################################################################ -->" )
 		_G.objectsPrinted = {}
 	end	
 	
@@ -265,7 +279,7 @@ function printObjectAsXML( object, depth, recursingFlag )
 		if #objectShowingChildren > 0 then
 			print( ">" )
 			for _,childObj in ipairs(objectShowingChildren) do
-				printObjectAsXML( childObj, depth+1, true )
+				printObjectAsXML( childObj, showReferenced, depth+1, true )
 			end
 			print( indent.."</"..runtime.luastring[ object.__name ]..">" )
 		else
@@ -275,14 +289,13 @@ function printObjectAsXML( object, depth, recursingFlag )
 	
 	_G.objectsPrinted[ object ] = true
 	
-	if not recursingFlag then
+	if showReferenced and not recursingFlag then
 		print( "<!-- ############### Referenced Objects ############### -->" )
 		for id,object in ipairs(runtime.ObjectById) do
 			if not _G.objectsPrinted[ object ] and not runtime.luastring[ object ] and not runtime.luanumber[ object ] then
-				printObjectAsXML( object, 0, true )
+				printObjectAsXML( object, showReferenced, 0, true )
 			end
 		end
-		print( "<!-- ################################################################ -->" )
 	end
 end
 

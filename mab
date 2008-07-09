@@ -71,6 +71,12 @@ if arg.sourcefile then
 	LastCoreObjectIndex = #runtime.ObjectById
 	core.Roots.Lawn.program = parser.parse( code )
 	LastParsedObjectIndex = #runtime.ObjectById
+	
+	if arg.debugLevel and arg.debugLevel >= 3 then
+		print( "Parsed program tree:" )
+		core.printObjectAsXML( core.Roots.Lawn.program )
+	end
+	
 	core.evaluateChunk( core.Roots.Lawn.program )
 	LastRuntimeObjectIndex = #runtime.ObjectById
 end

@@ -27,7 +27,8 @@ tests = {
 	"15_ObjectScope",
 	"15b_SubtleObjectScope",
 	"16_locals_shadow_context",
-	"17_scope_resolution"
+	"17_scope_resolution",
+	"18_subexpressions"
 }
 
 function setup()

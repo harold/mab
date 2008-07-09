@@ -15,12 +15,11 @@ Roots.Number['+'] = createLuaFunc( 'addend', function( context ) -- Number#+
 	local lvalue = runtime.luanumber[ context.self ]
 	local rvalue = runtime.luanumber[ context.addend ]
 	if not rvalue then
-		local theNextMessageOrLiteral = context.callState.message.next
-		if theNextMessageOrLiteral == Roots['nil'] then
-			error( "Number#+ is missing an addend" )
+		rvalue = slurpNextValue( context.callState )
+		if rvalue == Roots['nil'] then
+			error( "Number#+ is mising an addend" )
 		end
-		context.callState.callingContext.nextMessage = theNextMessageOrLiteral.next
-		rvalue = runtime.luanumber[ sendMessage( context.callState.callingContext, theNextMessageOrLiteral, context.callState.callingContext ) ]
+		rvalue = runtime.luanumber[ rvalue ]
 	end
 	return runtime.number[ lvalue + rvalue ]
 end )
@@ -29,12 +28,11 @@ Roots.Number['-'] = createLuaFunc( 'subtrahend', function( context ) -- Number#-
 	local lvalue = runtime.luanumber[ context.self ]
 	local rvalue = runtime.luanumber[ context.subtrahend ]
 	if not rvalue then
-		local theNextMessageOrLiteral = context.callState.message.next
-		if theNextMessageOrLiteral == Roots['nil'] then
-			error( "Number#- is missing a subtrahend" )
+		rvalue = slurpNextValue( context.callState )
+		if rvalue == Roots['nil'] then
+			error( "Number#- is mising a subtrahend" )
 		end
-		context.callState.callingContext.nextMessage = theNextMessageOrLiteral.next
-		rvalue = runtime.luanumber[ sendMessage( context.callState.callingContext, theNextMessageOrLiteral, context.callState.callingContext ) ]
+		rvalue = runtime.luanumber[ rvalue ]
 	end
 	return runtime.number[ lvalue - rvalue ]
 end )
@@ -42,12 +40,26 @@ end )
 Roots.Number['>'] = createLuaFunc( 'rvalue', function( context ) -- Number#>
 	local lvalue = runtime.luanumber[ context.self ]
 	local rvalue = runtime.luanumber[ context.rvalue ]
+	if not rvalue then
+		rvalue = slurpNextValue( context.callState )
+		if rvalue == Roots['nil'] then
+			error( "Number#> is mising an rvalue" )
+		end
+		rvalue = runtime.luanumber[ rvalue ]
+	end
 	return (lvalue > rvalue) and Roots['true'] or Roots['false']
 end )
 
 Roots.Number['<'] = createLuaFunc( 'rvalue', function( context ) -- Number#<
 	local lvalue = runtime.luanumber[ context.self ]
 	local rvalue = runtime.luanumber[ context.rvalue ]
+	if not rvalue then
+		rvalue = slurpNextValue( context.callState )
+		if rvalue == Roots['nil'] then
+			error( "Number#< is mising an rvalue" )
+		end
+		rvalue = runtime.luanumber[ rvalue ]
+	end
 	return (lvalue < rvalue) and Roots['true'] or Roots['false']
 end )
 
@@ -55,12 +67,11 @@ Roots.Number['*'] = createLuaFunc( 'multiplicand', function( context ) -- Number
 	local lvalue = runtime.luanumber[ context.self ]
 	local rvalue = runtime.luanumber[ context.multiplicand ]
 	if not rvalue then
-		local theNextMessageOrLiteral = context.callState.message.next
-		if theNextMessageOrLiteral == Roots['nil'] then
-			error( "Number#* is missing a multiplicand" )
+		rvalue = slurpNextValue( context.callState )
+		if rvalue == Roots['nil'] then
+			error( "Number#* is mising a multiplicand" )
 		end
-		context.callState.callingContext.nextMessage = theNextMessageOrLiteral.next
-		rvalue = runtime.luanumber[ sendMessage( context.callState.callingContext, theNextMessageOrLiteral, context.callState.callingContext ) ]
+		rvalue = runtime.luanumber[ rvalue ]
 	end
 	return runtime.number[ lvalue * rvalue ]
 end )
@@ -69,12 +80,11 @@ Roots.Number['/'] = createLuaFunc( 'divisor', function( context ) -- Number#/
 	local lvalue = runtime.luanumber[ context.self ]
 	local rvalue = runtime.luanumber[ context.divisor ]
 	if not rvalue then
-		local theNextMessageOrLiteral = context.callState.message.next
-		if theNextMessageOrLiteral == Roots['nil'] then
-			error( "Number#/ is missing a divisor" )
+		rvalue = slurpNextValue( context.callState )
+		if rvalue == Roots['nil'] then
+			error( "Number#/ is mising a divisor" )
 		end
-		context.callState.callingContext.nextMessage = theNextMessageOrLiteral.next
-		rvalue = runtime.luanumber[ sendMessage( context.callState.callingContext, theNextMessageOrLiteral, context.callState.callingContext ) ]
+		rvalue = runtime.luanumber[ rvalue ]
 	end
 	return runtime.number[ lvalue / rvalue ]
 end )

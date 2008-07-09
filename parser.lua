@@ -7,10 +7,11 @@ require 'utils'
 module('parser',package.seeall)
 
 grammar = [[
-	Chunk         <-   &. -> startChunk <Expression> (<Terminator> <Expression>)* -> endChunk
-	Expression    <-   &. -> startExpr <Space> (<Message>/<String>/<Number>)+ -> endExpr
-	ArgExpression <-   <Chunk> -> addArgChunk ("," <Space> / &<CloseParen>)
-	Message       <-   ( <Identifier> / <Operator> ) -> startMessage <Arguments>?  <Separator>* -> endMessage
+	Chunk         <-   &. -> startChunk <Expression> (<Terminator> <Expression>)* -> closeChunk
+	Expression    <-   &. -> startExpr <Space> (<Message>/<String>/<Number>/<SubExpression>)+ -> closeExpr
+	SubExpression <-   <OpenParen> <Expression> <CloseParen>
+	ArgExpression <-   <Chunk> ("," <Space> / &<CloseParen>)
+	Message       <-   ( <Identifier> / <Operator> ) -> startMessage <Arguments>?  <Separator>* -> closeMessage
 	Arguments     <-   <OpenParen> <ArgExpression>* <CloseParen>
 	Identifier    <-   [a-zA-Z_]+
 	Operator      <-   [=~`!@$%^&*|<>?/\\+-]+
@@ -26,53 +27,37 @@ grammar = [[
 ]]
 
 ast = {}
-exprStack = {}
-chunkStack = {}
-argsStack = {}
-messageStack = {}
-stringStack = {}
 
-parseFuncs = {}
-function parseFuncs.startChunk( )
-	local chunk = { tag="chunk" }
-	table.insert( chunkStack, chunk )
+function pushNode( tagName, str )
+	table.insert( ast, { tag=tagName, str=str } )
 end
 
-function parseFuncs.endChunk( inMatch )
-	table.insert( ast, table.remove( chunkStack ) )
+function popNode( expectedTagName )
+	local node = table.remove( ast )
+	if node.tag ~= expectedTagName then
+		error( "Popped a "..node.tag.." off the ast stack when I expected a "..expectedTagName )
+	end
+	if #ast > 0 then
+		table.insert( ast[#ast], node )
+	else
+		ast.rootNode = node
+	end
 end
 
-function parseFuncs.startExpr( inMatch )
-	local expression = { tag="expression" }
-	table.insert( exprStack, expression )
+function addChild( tagName, str )
+	table.insert( ast[#ast], { tag=tagName, str=str } )
 end
 
-function parseFuncs.endExpr( inMatch )
-	table.insert( chunkStack[#chunkStack], table.remove( exprStack ) )
-end
-
-function parseFuncs.startMessage( inMatch )
-	local message = { tag="message", str=inMatch }
-	table.insert( messageStack, message )
-end
-
-function parseFuncs.endMessage( inMatch )
-	table.insert( exprStack[#exprStack], table.remove( messageStack ) )
-end
-
-function parseFuncs.addArgChunk( )
-	table.insert( messageStack[#messageStack], table.remove( ast ) )
-end
-
-function parseFuncs.addString( inMatch )
-	local string = { tag="string", str=inMatch }
-	table.insert( exprStack[#exprStack], string )
-end
-
-function parseFuncs.addNumber( inMatch )
-	local number = { tag="number", str=inMatch }
-	table.insert( exprStack[#exprStack], number )
-end
+parseFuncs = {
+	startChunk    = function(   ) pushNode( 'chunk'      ) end,
+	closeChunk    = function(   ) popNode(  'chunk'      ) end,
+	startExpr     = function(   ) pushNode( 'expression' ) end,
+	closeExpr     = function(   ) popNode(  'expression' ) end,
+	startMessage  = function( s ) pushNode( 'message', s ) end,
+	closeMessage  = function(   ) popNode(  'message'    ) end,	
+	addString     = function( s ) addChild( 'string', s  ) end,
+	addNumber     = function( s ) addChild( 'number', s  ) end
+}
 
 function parseFile( file )
 	return parse( io.input(file):read("*a") )
@@ -84,7 +69,7 @@ function parse( code )
 		table.dump( ast )
 		error( "Failed to parse code! (Got to around char "..tostring(matchLength).." / "..(#code)..")" )
 	end
-	return codeFromAST( table.remove( ast ) )
+	return codeFromAST( ast.rootNode )
 end
 
 function codeFromAST( t )
@@ -132,6 +117,10 @@ end )
 
 function runString( code )
 	core.Roots.Lawn.program = parser.parse( code )
+	if arg.debugLevel and arg.debugLevel >= 3 then
+		print( "Parsed program tree:" )
+		core.printObjectAsXML( core.Roots.Lawn.program )
+	end
 	core.evaluateChunk( core.Roots.Lawn.program )
 	-- TODO: error codes
 end
