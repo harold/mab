@@ -57,7 +57,6 @@ if arg.help or arg.examples then
 	os.exit( )
 end
 
-
 require 'parser'
 
 if arg.sourcefile then
@@ -68,18 +67,32 @@ if arg.sourcefile then
 	io.input( arg.sourcefile )
 	local code = io.read("*a")
 
+	if arg.profile then
+		pcall( function()
+			require "luarocks.require"
+			require "profiler"
+			profiler.__profileFile = string.gsub( arg.sourcefile, "[^.]+$", "profile" )
+			profiler.start( profiler.__profileFile )
+		end )
+	end
+
 	local Lawn = core.Roots.Lawn
 	LastCoreObjectIndex = #runtime.ObjectById
 	Lawn.program = parser.parse( code )
 	LastParsedObjectIndex = #runtime.ObjectById
 	
-	if arg.debugLevel and arg.debugLevel >= 3 then
-		print( "Parsed program tree:" )
-		core.printObjectAsXML( Lawn.program )
-	end
+	-- if arg.debugLevel and arg.debugLevel >= 3 then
+	-- 	print( "Parsed program tree:" )
+	-- 	core.printObjectAsXML( Lawn.program )
+	-- end
 	
 	core.eval( Lawn, Lawn, Lawn.program )
 	LastRuntimeObjectIndex = #runtime.ObjectById
+
+	if arg.profile and profiler then
+		profiler:stop()
+	end
+
 end
 
 if arg.interactive then
@@ -108,7 +121,12 @@ if arg.profile then
 	for id=LastParsedObjectIndex+1,LastRuntimeObjectIndex do
 		print(string.format("0x%04x  %s", id, tostring(runtime.ObjectById[id])))
 	end
-	
+
+	if profiler then
+		print( string.rep("=",70) )
+		print( "Profile written to: "..profiler.__profileFile)
+		print( "Use 'lua test/analyze_profile.lua "..profiler.__profileFile.."' for details." )
+	end
 	-- print( string.rep("-",70) )
 	-- print( "Additional objects created to show this info: "..(#runtime.ObjectById - LastRuntimeObjectIndex) )
 end
