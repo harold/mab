@@ -1,15 +1,16 @@
 Roots.Context.p = createLuaFunc( function( context ) -- Context#p
 	local args = context.callState.message.arguments
+	local callingContext = context.callState.callingContext
 	for i=1, #args do
-		local theExpressionValue = evaluateChunk( args[i], context.callState.callingContext )
-		print( toLuaString(theExpressionValue) )
+		local theExpressionValue = eval( callingContext, callingContext, args[i] )
+		print( toLuaString( theExpressionValue ) )
 	end
 	return Roots['nil']
 end )
 
 Roots.Context.method = createLuaFunc( function( context ) -- Context#method
-	local theLastChunk = context.callState.message.arguments[ #context.callState.message.arguments ]
-	local theFunc = runtime.setInheritance( theLastChunk, Roots.Function )
+	local theLastExpr = context.callState.message.arguments[ #context.callState.message.arguments ]
+	local theFunc     = runtime.setInheritance( theLastExpr, Roots.Function )
 
 	theFunc.namedArguments = sendMessageAsString( Roots.Array, 'new' )
 	local theNumArgs = #context.callState.message.arguments-1
@@ -24,25 +25,26 @@ Roots.Context['while'] = createLuaFunc( function( context ) -- Context#while
 	if #context.callState.message.arguments ~= 2 then
 		error( "while requires 2 arguments" )
 	end
-	local conditionChunk = context.callState.message.arguments[ 1 ]
-	local clauseChunk    = context.callState.message.arguments[ 2 ]
-	local contextOfWhile = context.self
-	local condition = evaluateChunk( conditionChunk, contextOfWhile )
-	local theReturnValue = Roots['nil']
+	local conditionExpression = context.callState.message.arguments[ 1 ]
+	local clauseExpression    = context.callState.message.arguments[ 2 ]
+	local contextOfWhile      = context.self
+	local condition           = eval( contextOfWhile, contextOfWhile, conditionExpression )
+	local returnValue         = Roots['nil']
 	while condition ~= Roots['nil'] and condition ~= Roots['false'] do
-		theReturnValue = evaluateChunk( clauseChunk, contextOfWhile )
-		condition = evaluateChunk( conditionChunk, contextOfWhile )
+		returnValue = eval( contextOfWhile, contextOfWhile, clauseExpression )
+		condition   = eval( contextOfWhile, contextOfWhile, conditionExpression )
 	end
-	return theReturnValue 
+	return returnValue 
 end )
 
 Roots.Context['if'] = createLuaFunc( function( context ) -- Context#if
 	local contextOfFunc	 = context.self
-	local conditionValue = evaluateChunk( context.callState.message.arguments[ 1 ], contextOfFunc )
+	local args           = context.callState.message.arguments
+	local conditionValue = eval( contextOfFunc, contextOfFunc, args[ 1 ] )
 	if conditionValue ~= Roots['nil'] and conditionValue ~= Roots['false'] then
-		return evaluateChunk( context.callState.message.arguments[ 2 ], contextOfFunc )
+		return eval( contextOfFunc, contextOfFunc, args[ 2 ] )
 	else
-		return evaluateChunk( context.callState.message.arguments[ 3 ], contextOfFunc )
+		return eval( contextOfFunc, contextOfFunc, args[ 3 ] )
 	end
 end )
 

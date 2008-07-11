@@ -1,9 +1,10 @@
 Roots.Message = runtime.childFrom( Roots.Object, "Message" )
 
 Roots.Message.new = createLuaFunc( "identifier", function( context ) -- Message#new
+	local callingContext = context.callState.callingContext
 	-- TODO: perhaps stop trying to be so DRY and just runtime.childFrom( Roots.Message )
 	-- ...or wait, why isn't this using createMessage()?
-	local theMessage = executeFunction( Roots.Object.new, context.self, messageCache['new'], context.callState.callingContext )
+	local theMessage = executeFunction( Roots.Object.new, context.self, messageCache['new'], callingContext )
 	if context.identifier ~= Roots['nil'] then
 		theMessage.identifier = context.identifier
 	end
@@ -13,7 +14,7 @@ Roots.Message.new = createLuaFunc( "identifier", function( context ) -- Message#
 	-- TODO: perhaps allow storing as chunks in the future?
 	local args = context.callState.message.arguments
 	for i=2, #args do
-		theMessage.arguments[i-1] = createChunk( createExpression( evaluateChunk( args[i], context.callState.callingContext ) ) )
+		theMessage.arguments[i-1] = eval( callingContext, callingContext, args[i] )
 	end
 	
 	return theMessage
@@ -21,7 +22,7 @@ end )
 
 Roots.Message.addArgument = createLuaFunc( "inArgValue", function( context ) -- Message#addArgument
 	local args = context.self.arguments
-	args[ #args + 1 ] = createChunk( createExpression( context.inArgValue ) )
+	core.addChildren( args, context.inArgValue )
 	return runtime.number[ #args ]
 end )
 
@@ -34,8 +35,8 @@ Roots.Message.asCode = createLuaFunc( function( context ) -- Message#asCode
 		theResult = context.self.identifier
 	else
 		local theArgumentsCode = {}
-		for i,argumentChunk in ipairs(context.self.arguments ) do
-			theArgumentsCode[i] = runtime.luastring[ sendMessageAsString( argumentChunk, 'asCode' ) ]
+		for i,argObj in ipairs(context.self.arguments ) do
+			theArgumentsCode[i] = runtime.luastring[ sendMessageAsString( argObj, 'asCode' ) ]
 		end
 		theResult = runtime.string[ string.format( "%s( %s )",
 			runtime.luastring[ context.self.identifier ],

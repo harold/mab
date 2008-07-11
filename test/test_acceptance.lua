@@ -38,8 +38,8 @@ function setup()
 	core.Roots.Context.p = core.createLuaFunc( function( context )
 		local args = context.callState.message.arguments
 		for i=1, #args do
-			local theExpressionValue = core.evaluateChunk( args[i], context.callState.callingContext )
-			runtime.stdout = runtime.stdout .. core.toLuaString(theExpressionValue) .. "\n"
+			local theValue = core.eval( context.callState.callingContext, context.callState.callingContext, args[i] )
+			runtime.stdout = runtime.stdout .. core.toLuaString( theValue ) .. "\n"
 		end
 		return core.Roots['nil']
 	end )

@@ -7,7 +7,7 @@ require 'utils'
 module('parser',package.seeall)
 
 grammar = [[
-	Chunk         <-   &. -> startChunk <Expression> (<Terminator> <Expression>)* -> closeChunk
+	Chunk         <-   &. -> startExpr <Expression> (<Terminator> <Expression>)* -> closeExpr
 	Expression    <-   &. -> startExpr <Space> (<Message>/<String>/<Number>/<SubExpression>)+ -> closeExpr
 	SubExpression <-   <OpenParen> <Expression> <CloseParen>
 	ArgExpression <-   <Chunk> ("," <Space> / &<CloseParen>)
@@ -37,9 +37,11 @@ function popNode( expectedTagName )
 	if node.tag ~= expectedTagName then
 		error( "Popped a "..node.tag.." off the ast stack when I expected a "..expectedTagName )
 	end
-	if #ast > 0 then
+	if ast[1] then
 		table.insert( ast[#ast], node )
 	else
+		-- This should only ever get set once, by the first expression
+		-- TODO: We could perform a sanity check and error if it was already written.
 		ast.rootNode = node
 	end
 end
@@ -49,8 +51,6 @@ function addChild( tagName, str )
 end
 
 parseFuncs = {
-	startChunk    = function(   ) pushNode( 'chunk'      ) end,
-	closeChunk    = function(   ) popNode(  'chunk'      ) end,
 	startExpr     = function(   ) pushNode( 'expression' ) end,
 	closeExpr     = function(   ) popNode(  'expression' ) end,
 	startMessage  = function( s ) pushNode( 'message', s ) end,
@@ -73,14 +73,7 @@ function parse( code )
 end
 
 function codeFromAST( t )
-	if t.tag=="chunk" then
-		local chunk = core.createChunk()
-		for i,childAST in ipairs( t ) do
-			core.addChildren( chunk, codeFromAST( childAST ) )
-		end
-		return chunk
-		
-	elseif t.tag=="expression" then
+	if t.tag=="expression" then
 		local expression = core.createExpression()
 		for i,childAST in ipairs(t) do
 			core.addChildren( expression, codeFromAST( childAST ) )
@@ -109,18 +102,19 @@ core.Roots.String.interpolate = core.createLuaFunc( function( context )
 	local str = runtime.luastring[ context.self ]
 	str = string.gsub( str, "#(%b{})", function( chunkWithBrackets )
 		local chunk = parse( string.sub( chunkWithBrackets, 2, -2 ) )
-		local value = core.evaluateChunk( chunk, context.callState.callingContext )
+		local value = core.eval( context.callState.callingContext, context.callState.callingContext, chunk )
 		return core.toLuaString( value )
 	end)
 	return runtime.string[ str ]
 end )
 
 function runString( code )
-	core.Roots.Lawn.program = parser.parse( code )
+	local Lawn = core.Roots.Lawn
+	Lawn.program = parser.parse( code )
 	if arg.debugLevel and arg.debugLevel >= 3 then
 		print( "Parsed program tree:" )
-		core.printObjectAsXML( core.Roots.Lawn.program )
+		core.printObjectAsXML( Lawn.program )
 	end
-	core.evaluateChunk( core.Roots.Lawn.program )
+	core.eval( Lawn, Lawn, Lawn.program )
 	-- TODO: error codes
 end

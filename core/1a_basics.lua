@@ -23,7 +23,7 @@ runtime.Meta.__tostring = function( object )
   elseif object == String then
     return runtime.luastring[object.__name]
   else
-  	return runtime.luastring[ sendMessage( object, messageCache['toString'], Roots.Lawn ) ]
+  	return runtime.luastring[ sendMessage( Roots.Lawn, object, messageCache['toString'] ) ]
   end
 end
 
@@ -34,13 +34,13 @@ Roots.Object = Object
 Roots.String = String
 Roots.Roots  = Roots
 
-Roots.Array     = runtime.childFrom( Roots.Object, "Array"     )
-Roots.Chunk     = runtime.childFrom( Roots.Array,  "Chunk"     ) 
-Roots.Function  = runtime.childFrom( Roots.Chunk,  "Function"  )
-Roots.CallState = runtime.childFrom( Roots.Object, "CallState" )
-
-Roots.Context   = runtime.childFrom( Roots.Object,  "Context"  )
-Roots.Lawn      = runtime.childFrom( Roots.Context, "Lawn"     )
+Roots.Array      = runtime.childFrom( Roots.Object,     "Array"      )
+Roots.Expression = runtime.childFrom( Roots.Array,      "Expression" ) 
+Roots.Function   = runtime.childFrom( Roots.Expression, "Function"   )
+Roots.CallState  = runtime.childFrom( Roots.Object,     "CallState"  )
+                                                                 
+Roots.Context    = runtime.childFrom( Roots.Object,     "Context"   )
+Roots.Lawn       = runtime.childFrom( Roots.Context,    "Lawn"      )
 
 --TODO: Should this really inherit from object, or not?
 Roots['nil'] = runtime.childFrom( Roots.Object, "nil (the object)" )

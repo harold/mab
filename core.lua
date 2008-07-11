@@ -1,19 +1,9 @@
 require 'runtime'
 module( 'core', package.seeall )
 
-function createChunk( ... )
-	local chunk = runtime.childFrom( Roots.Chunk )
-	if select('#',...) > 0 then
-		addChildren( chunk, ... )
-	end
-	return chunk
-end
-
-function createExpression( ... )
+function createExpression( creationContext )
 	local expression = runtime.childFrom( Roots.Expression )
-	if select('#',...) > 0 then
-		addChildren( expression, ... )
-	end
+	expression.creationContext = creationContext or Roots.Lawn
 	return expression
 end
 
@@ -43,7 +33,7 @@ end
 
 function createLuaFunc( ... )
 	local func = runtime.childFrom( Roots.Function )
-	
+
 	-- FIXME: sendMessageAsString( Roots.Array, 'new' ) fails; perhaps too soon?
 	func.namedArguments = runtime.childFrom( Roots.Array )
 
@@ -56,56 +46,57 @@ function createLuaFunc( ... )
 		end
 		func.namedArguments[i] = runtime.string[theArgName]
 	end
-	
+
 	local theFunction = select(theNumArgs+1,...)
 	if type(theFunction)~="function" then
 		-- TODO: remove for speed
 		error( "Final argument to createLuaFunc() is not a function (it is a "..tostring(theFunction)..")" )
 	end
-		
+
 	func.__luaFunction = theFunction
 	return func
 end
 
 -- ##########################################################################
 
-function evaluateChunk( chunk, context )
-	if not context then context = Roots.Lawn end
-	if chunk.__luaFunction ~= Roots['nil'] then
-		return chunk.__luaFunction( context ) or Roots['nil']
+function eval( context, receiver, expressionOrMessageOrLiteral )
+	if runtime.isKindOf( expressionOrMessageOrLiteral, Roots.Expression ) then
+		return evaluateExpression( context, context, expressionOrMessageOrLiteral )
+	elseif runtime.isKindOf( expressionOrMessageOrLiteral, Roots.Message ) then
+		return sendMessage( context, receiver, expressionOrMessageOrLiteral )
 	else
-		local lastValue = Roots['nil']
-		for _,expression in ipairs(chunk) do
-			lastValue = evaluateExpression( expression, context )
-		end
-		return lastValue
-	end
-end
-
-function evaluateExpression( expression, context )
-	-- FIXME: Shouldn't this be set by createExpression (defaulting to Lawn sometimes)?
-	if expression.creationContext == Roots['nil'] then
-		expression.creationContext = context
-	end
-
-	local receiver = context
-	context.nextMessage = expression[1]
-	while context.nextMessage ~= Roots['nil'] do
-		local theCurrentMessage = context.nextMessage
-		context.nextMessage = context.nextMessage.next
-		receiver = sendMessage( receiver, theCurrentMessage, context )
-	end
-		
-	return receiver
-end
-
-function sendMessage( receiver, messageOrLiteral, callingContext )
-	if messageOrLiteral.identifier == Roots['nil'] then
 		-- Presumably this is a literal
-		-- TODO: Warning about literals sent as message if the receiver isn't a context
-		return messageOrLiteral
+		if arg.debugLevel and arg.debugLevel >= 1 and not runtime.isKindOf( receiver, Roots.Context ) then
+			print( "Warning: Literal value '"..tostring(expressionOrMessageOrLiteral).."' sent to non-context: "..tostring(receiver))
+		end
+		return expressionOrMessageOrLiteral
 	end
+end
 
+function evaluateExpression( context, initialReceiver, expression )
+	if expression.__luaFunction ~= Roots['nil'] then
+		return expression.__luaFunction( context ) or Roots['nil']
+	else
+		local receiver = initialReceiver
+		if context.evalStack == Roots['nil'] then
+			context.evalStack = runtime.childFrom( Roots.Array )
+		end
+
+		local evalStackLevel = #context.evalStack + 1
+		context.evalStack[ evalStackLevel ] = expression[1]
+
+		while context.evalStack[ evalStackLevel ] ~= Roots['nil'] do
+			local theCurrentObj = context.evalStack[ evalStackLevel ]
+			context.evalStack[ evalStackLevel ] = theCurrentObj.next
+			receiver = eval( context, receiver, theCurrentObj )
+		end
+
+		context.evalStack[ evalStackLevel ] = nil
+		return receiver
+	end
+end
+
+function sendMessage( callingContext, receiver, messageOrLiteral )
 	local messageName = runtime.luastring[ messageOrLiteral.identifier ]
 	local obj = receiver[ messageName ]
 
@@ -132,7 +123,7 @@ function executeFunction( functionObject, receiver, message, callingContext )
 		end
 		callingContext = Roots.Lawn
 	end
-	
+
 	local context = runtime.childFrom( callingContext )
 	context.self = receiver
 	context.callState = runtime.childFrom( Roots.CallState )
@@ -141,18 +132,18 @@ function executeFunction( functionObject, receiver, message, callingContext )
 	context.callState.context = context
 	context.callState['function'] = functionObject
 	context.callState.callingContext = callingContext
-	
+
 	-- Setup local parameters
 	-- TODO: syntax to allow eval of chunks to be optional
 	if functionObject.namedArguments ~= Roots['nil'] then
-		local theNextMessageInCallingContext = callingContext.nextMessage
+		local theNextMessageInCallingContext = callingContext.evalStack[ #callingContext.evalStack ]
 		for i=1,#functionObject.namedArguments do
 			local theArgName = runtime.luastring[ functionObject.namedArguments[i] ]
 			if arg.debugLevel and arg.debugLevel >= 2 and rawget( context, theArgName ) then
 				print( "Warning: overriding built in context property '"..theArgName.."'" )
 			end
 			if message.arguments[i] ~= Roots['nil'] then
-				context[ theArgName ] = evaluateChunk( message.arguments[i], callingContext )
+				context[ theArgName ] = eval( callingContext, callingContext, message.arguments[i] )
 			else
 				if arg.debugLevel and arg.debugLevel >= 3 then
 					print( "Warning: No argument passed for parameter '"..theArgName.."'; setting to Roots.nil" )
@@ -160,10 +151,10 @@ function executeFunction( functionObject, receiver, message, callingContext )
 				context[ theArgName ] = Roots['nil']
 			end
 		end
-		callingContext.nextMessage = theNextMessageInCallingContext
+		callingContext.evalStack[ #callingContext.evalStack ] = theNextMessageInCallingContext
 	end
 
-	return evaluateChunk( functionObject, context )
+	return evaluateExpression( context, context, functionObject )
 end
 
 -- ##########################################################################
@@ -185,7 +176,6 @@ function sendMessageAsString( object, messageString, ... )
 	else
 		-- Assume each argument to the message is a simple Mab object;
 		-- wrap in chunks for proper passing
-		local theArgChunks = { }
 		theMessage = createMessage( messageString, ... )
 	end
 	-- TODO: lookup via getSlot or sendMessage? (would allow warnings or errors to be single sourced)
@@ -203,7 +193,7 @@ function toObjString( object )
 		object = object.__name
 	elseif not runtime.isKindOf( object, String ) then
 		-- TODO: Perhaps replace test with a simple runtime.luastring[object], since every string object should have an entry here
-		object = sendMessage( object, messageCache['toString'], Roots.Lawn )
+		object = sendMessage( Roots.Lawn , object, messageCache['toString'] )
 	end
 	-- TODO: Perhaps replace test with a simple runtime.luastring[object], since every string object should have an entry here
 	if runtime.isKindOf( object, String ) then
@@ -222,36 +212,33 @@ end
 function slurpNextValue( callState )
 	local theNextValue = callState.message.next
 	if theNextValue ~= Roots['nil'] then
-		callState.callingContext.nextMessage = theNextValue.next
-		if runtime.isKindOf( theNextValue, Roots.Expression ) then
-			theNextValue = evaluateExpression( theNextValue, callState.callingContext )
-		elseif runtime.isKindOf( theNextValue, Roots.Message ) then
-			theNextValue = sendMessage( callState.callingContext, theNextValue, callState.callingContext )
-		end
+		local evalStack = callState.callingContext.evalStack
+		evalStack[ #evalStack ] = theNextValue.next
+		theNextValue = eval( callState.callingContext, callState.callingContext, theNextValue )
 	end
 	return theNextValue
 end
 
 -- ##########################################################################
 
--- TODO: remove this debug function (or more to debug utils)
+-- TODO: remove this debug function (or more to debug utils, callState.callingContext, theNextValue )
 function printObjectAsXML( object, showReferenced, depth, recursingFlag )
 	if not depth then depth = 0 end
 
 	if not recursingFlag then
 		_G.objectsPrinted = {}
-	end	
-	
+	end
+
 	local indent = string.rep( "  ", depth )
 
 	if runtime.luanumber[ object ] then
 		print( indent.."(N)"..runtime.luanumber[ object ] )
-		
+
 	elseif runtime.luastring[ object ] then
 		print( indent.."(S)"..string.sub( string.format("%q",runtime.luastring[object]), 2, -2 ) )
-		
+
 	else
-		local attrs = {}		
+		local attrs = {}
 		for attrName,attrObj in pairs(object) do
 			if not tonumber( attrName ) then
 				local valueString = (runtime.luanumber[ attrObj ] and ("(N)"..runtime.luanumber[attrObj])) or
@@ -269,13 +256,13 @@ function printObjectAsXML( object, showReferenced, depth, recursingFlag )
 		for attrName,valueString in pairs(attrs) do
 			io.write( " "..attrName..'="'..valueString..'"' )
 		end
-		
+
 		local objectShowingChildren = object
 		if runtime.isKindOf( object.arguments, Roots.ArgList ) then
 			objectShowingChildren = object.arguments
 			_G.objectsPrinted[ object.arguments ] = true
 		end
-		
+
 		if #objectShowingChildren > 0 then
 			print( ">" )
 			for _,childObj in ipairs(objectShowingChildren) do
@@ -286,9 +273,9 @@ function printObjectAsXML( object, showReferenced, depth, recursingFlag )
 			print( " />" )
 		end
 	end
-	
+
 	_G.objectsPrinted[ object ] = true
-	
+
 	if showReferenced and not recursingFlag then
 		print( "<!-- ############### Referenced Objects ############### -->" )
 		for id,object in ipairs(runtime.ObjectById) do
@@ -308,7 +295,6 @@ lua_files = {
 	"array.lua",
 	"boolean.lua",
 	"callstate.lua",
-	"chunk.lua",
 	"context.lua",
 	"expression.lua",
 	"function.lua",

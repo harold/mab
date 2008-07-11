@@ -68,16 +68,17 @@ if arg.sourcefile then
 	io.input( arg.sourcefile )
 	local code = io.read("*a")
 
+	local Lawn = core.Roots.Lawn
 	LastCoreObjectIndex = #runtime.ObjectById
-	core.Roots.Lawn.program = parser.parse( code )
+	Lawn.program = parser.parse( code )
 	LastParsedObjectIndex = #runtime.ObjectById
 	
 	if arg.debugLevel and arg.debugLevel >= 3 then
 		print( "Parsed program tree:" )
-		core.printObjectAsXML( core.Roots.Lawn.program )
+		core.printObjectAsXML( Lawn.program )
 	end
 	
-	core.evaluateChunk( core.Roots.Lawn.program )
+	core.eval( Lawn, Lawn, Lawn.program )
 	LastRuntimeObjectIndex = #runtime.ObjectById
 end
 
@@ -91,21 +92,21 @@ if arg.profile then
 	print( LastCoreObjectIndex.." core objects:" )
 	print( string.rep("-",70) )
 	for id=1,LastCoreObjectIndex do
-		print(id,runtime.ObjectById[id])
+		print(string.format("0x%04x  %s", id, tostring(runtime.ObjectById[id])))
 	end
 
 	print( string.rep("=",70) )
 	print( (LastParsedObjectIndex-LastCoreObjectIndex).." objects created during parsing:" )
 	print( string.rep("-",70) )
 	for id=LastCoreObjectIndex+1,LastParsedObjectIndex do
-		print(id,runtime.ObjectById[id])
+		print(string.format("0x%04x  %s", id, tostring(runtime.ObjectById[id])))
 	end
 
 	print( string.rep("=",70) )
 	print( (LastRuntimeObjectIndex-LastParsedObjectIndex).." objects created at runtime:" )
 	print( string.rep("-",70) )
 	for id=LastParsedObjectIndex+1,LastRuntimeObjectIndex do
-		print(id,runtime.ObjectById[id])
+		print(string.format("0x%04x  %s", id, tostring(runtime.ObjectById[id])))
 	end
 	
 	-- print( string.rep("-",70) )

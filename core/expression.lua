@@ -10,22 +10,29 @@ end )
 
 Roots.Expression.appendMessage = Roots.Array.push
 
-Roots.Expression.eval = createLuaFunc( 'evalContext', function( context ) -- Expression#eval
+Roots.Expression.eval = createLuaFunc( 'evalContext', 'receiver', function( context ) -- Expression#eval
 	-- Users may optionally specify an explicit context to evaluate in
-	local evalContext = context.evalContext
-	
 	-- Expressions explicitly created (Expression new) have a creationContext
-	if evalContext == Roots['nil'] then
-		evalContext = context.self.creationContext
-		if _DEBUG then print( "No explicit context for Expression#eval; using "..tostring(evalContext) ) end
+	if context.evalContext == Roots['nil'] then
+		context.evalContext = context.self.creationContext
+		if arg.debugLevel and arg.debugLevel >= 2 then
+			print( "No explicit context for Expression#eval; using "..tostring(context.evalContext) )
+		end
+
 		-- As a fallback, evaluate the expression in the context eval was called in
-		if evalContext == Roots['nil'] then
-			evalContext = context.callState.callingContext
-			if _DEBUG then print( "...and no creationContext, either; using "..tostring(evalContext) ) end
+		if context.evalContext == Roots['nil'] then
+			context.evalContext = context.callState.callingContext
+			if arg.debugLevel and arg.debugLevel >= 2 then
+				print( "...and no creationContext, either; using "..tostring(evalContext) )
+			end	
 		end
 	end
 	
-	return evaluateExpression( context.self, evalContext )
+	if context.receiver == Roots['nil'] then
+		context.receiver = context.evalContext
+	end
+	
+	return evaluateExpression( context.evalContext, context.receiver, context.self )
 end )
 
 Roots.Expression.asCode = createLuaFunc( function( context ) -- Expression#asCode

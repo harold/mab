@@ -1,8 +1,8 @@
-Roots.Array.new = createLuaFunc( function( context) -- Array#new
+Roots.Array.new = createLuaFunc( function( context ) -- Array#new
 	local args = context.callState.message.arguments
 	local theArray = runtime.childFrom( Roots.Array )
 	for i=1, #args do
-		theArray[i] = evaluateChunk( args[i], context.callState.callingContext )
+		theArray[i] = evaluateExpression( context.callState.callingContext, context.callState.callingContext, args[i] )
 	end
 	return theArray
 end )
@@ -11,7 +11,7 @@ Roots.Array.push = createLuaFunc( function( context ) -- Array#push
 	local args = context.callState.message.arguments
 	local theOldSize = #context.self
 	for i=1, #args do
-		local theExpressionValue = evaluateChunk( args[i], context.callState.callingContext )
+		local theExpressionValue = evaluateExpression( context.callState.callingContext, context.callState.callingContext, args[i] )
 		context.self[ theOldSize + i ] = theExpressionValue
 	end
 end )
@@ -44,7 +44,7 @@ Roots.Array.each = createLuaFunc( function( context ) -- Array#each
 	  -- What could possibly go wrong?
 		context[ runtime.luastring[args[1][1][1].identifier] ] = v
 		for i,v in ipairs(args[2]) do
-			evaluateExpression( v, context )
+			evaluateExpression( context, context, v )
 		end
 	end
 end )
@@ -57,7 +57,7 @@ Roots.Array.eachWithIndex = createLuaFunc( function( context ) -- Array#eachWith
 	  -- What could possibly go wrong?
 		context[ runtime.luastring[args[2][1][1].identifier] ] = runtime.number[i]
 		for i,v in ipairs(args[3]) do
-			evaluateExpression( v, context )
+			evaluateExpression( context, context, v )
 		end
 	end
 end )
