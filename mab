@@ -17,6 +17,10 @@ if not arg.sourcefile then
 	arg.interactive = true
 end
 
+if not arg.debugLevel then
+	arg.debugLevel = 0
+end
+
 USAGE = [[
 Usage: mab [-h] [-e] [-d debugLevel] [-p] [-i] [sourcefile.mab]
        -h,--help          show this usage message
@@ -29,6 +33,7 @@ Usage: mab [-h] [-e] [-d debugLevel] [-p] [-i] [sourcefile.mab]
                           4 = ...plus trivial notes
        -p,--profile       show profile statistics after running the code
        -i,--interactive   enter interactive mode (read/evaluate/print loop)
+                          automatically enabled if no source file is supplied
 ]]
 
 EXAMPLES  = [[
@@ -81,7 +86,7 @@ if arg.sourcefile then
 	Lawn.program = parser.parse( code )
 	LastParsedObjectIndex = #runtime.ObjectById
 	
-	-- if arg.debugLevel and arg.debugLevel >= 3 then
+	-- if arg.debugLevel >= 3 then
 	-- 	print( "Parsed program tree:" )
 	-- 	core.printObjectAsXML( Lawn.program )
 	-- end

@@ -15,14 +15,14 @@ Roots.Expression.eval = createLuaFunc( 'evalContext', 'receiver', function( cont
 	-- Expressions explicitly created (Expression new) have a creationContext
 	if context.evalContext == Roots['nil'] then
 		context.evalContext = context.self.creationContext
-		if arg.debugLevel and arg.debugLevel >= 2 then
+		if arg.debugLevel >= 2 then
 			print( "No explicit context for Expression#eval; using "..tostring(context.evalContext) )
 		end
 
 		-- As a fallback, evaluate the expression in the context eval was called in
 		if context.evalContext == Roots['nil'] then
 			context.evalContext = context.callState.callingContext
-			if arg.debugLevel and arg.debugLevel >= 2 then
+			if arg.debugLevel >= 2 then
 				print( "...and no creationContext, either; using "..tostring(evalContext) )
 			end	
 		end

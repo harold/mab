@@ -66,7 +66,7 @@ function eval( context, receiver, expressionOrMessageOrLiteral )
 		return sendMessage( context, receiver, expressionOrMessageOrLiteral )
 	else
 		-- Presumably this is a literal
-		if arg.debugLevel and arg.debugLevel >= 1 and not runtime.isKindOf( receiver, Roots.Context ) then
+		if arg.debugLevel >= 1 and not runtime.isKindOf( receiver, Roots.Context ) then
 			print( "Warning: Literal value '"..tostring(expressionOrMessageOrLiteral).."' sent to non-context: "..tostring(receiver))
 		end
 		return expressionOrMessageOrLiteral
@@ -103,7 +103,7 @@ function sendMessage( callingContext, receiver, messageOrLiteral )
 	if obj == Roots['nil'] and messageName ~= 'nil' then
 		-- TODO: method_mising
 		-- FIXME: No need to error, just flow through to return Roots.nil
-		if arg.debugLevel and arg.debugLevel >= 1 then
+		if arg.debugLevel >= 1 then
 			print( "Warning: Cannot find message '"..tostring(messageName).."' on "..tostring(receiver) )
 		end
 	elseif obj.executeOnAccess ~= Roots['nil'] then
@@ -115,7 +115,7 @@ end
 
 function executeFunction( functionObject, receiver, message, callingContext )
 	if callingContext == Roots['nil'] then
-		if arg.debugLevel and arg.debugLevel >= 2 then
+		if arg.debugLevel >= 2 then
 			local messageString = runtime.luastring[message.identifier]
 			if messageString ~= 'toString' and messageString ~= 'asCode' then
 				print( "Warning: No message/expression context when sending '"..messageString.."'...so I'm using the Lawn instead." )
@@ -139,13 +139,13 @@ function executeFunction( functionObject, receiver, message, callingContext )
 		local theNextMessageInCallingContext = callingContext.evalStack[ #callingContext.evalStack ]
 		for i=1,#functionObject.namedArguments do
 			local theArgName = runtime.luastring[ functionObject.namedArguments[i] ]
-			if arg.debugLevel and arg.debugLevel >= 2 and rawget( context, theArgName ) then
+			if arg.debugLevel >= 2 and rawget( context, theArgName ) then
 				print( "Warning: overriding built in context property '"..theArgName.."'" )
 			end
 			if message.arguments[i] ~= Roots['nil'] then
 				context[ theArgName ] = eval( callingContext, callingContext, message.arguments[i] )
 			else
-				if arg.debugLevel and arg.debugLevel >= 3 then
+				if arg.debugLevel >= 3 then
 					print( "Warning: No argument passed for parameter '"..theArgName.."'; setting to Roots.nil" )
 				end
 				context[ theArgName ] = Roots['nil']

@@ -25,7 +25,7 @@ function childFrom( parentObject, name )
 	end
 	local object = blank( name )
 	addInheritance( object, parentObject )
-	if arg.debugLevel and arg.debugLevel >= 4 and parentObject.__name then
+	if arg.debugLevel >= 4 and parentObject.__name then
 		print( "Created "..luastring[parentObject.__name].." #"..ObjectId[object] )
 	end
 	return object

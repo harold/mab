@@ -111,7 +111,7 @@ end )
 function runString( code )
 	local Lawn = core.Roots.Lawn
 	Lawn.program = parser.parse( code )
-	if arg.debugLevel and arg.debugLevel >= 3 then
+	if arg.debugLevel >= 3 then
 		print( "Parsed program tree:" )
 		core.printObjectAsXML( Lawn.program )
 	end
