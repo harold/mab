@@ -33,10 +33,12 @@ function childFrom( parentObject, name )
 	return object
 end
 
+-- Re-used by the __index function to save creating a new table each call
+local breadthFirstQueue = {}
+
 -- Shared by every instance
 Meta = {
 	__index = function( object, slotName )
-		local breadthFirstQueue = { }
 		local queueSize = 0
 		
 		local ancestors = AncestorsPerObject[ object ]
@@ -49,7 +51,7 @@ Meta = {
 			else
 				queueSize = queueSize + 1
 				breadthFirstQueue[ queueSize ] = ancestors[1]
-			end				
+			end
 		end		
 
 		local currentIndex = 1
@@ -57,7 +59,7 @@ Meta = {
 		
 		-- initially nil; may be set to an object by the core	
 		local metaNil = Meta.nilValue
-		while currentObject do
+		while currentIndex <= queueSize do
 			local value = rawget( currentObject, slotName )
 			if value and value ~= metaNil then
 				return value
@@ -140,7 +142,9 @@ function valueFromNamespace( object, slotName, namespace )
 	return Meta.nilValue
 end
 
---TODO: remove in favor of Mab implementation
+-- TODO: remove in favor of Mab implementation
+-- This can't re-use the global breadthFirstQueue since it marks visited objects, which is hard to clear out.
+-- TODO: if we disallow circular chains upon creation, we don't need to detect at lookup time, which would allow this to be sped up.
 function isKindOf( object, ancestorObject )
 	local breadthFirstQueue = { object }
 	local currentIndex  = 1
