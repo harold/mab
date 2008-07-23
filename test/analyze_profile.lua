@@ -41,6 +41,7 @@ function CreateSummary(lines, summary)
 		word = string.match(lines[i], "[^\t]+\t[^\t]+\t([^\t]+)")
 		local_time, total_time = string.match(lines[i], "[^\t]+\t[^\t]+\t[^\t]+\t[^\t]+\t[^\t]+\t([^\t]+)\t([^\t]+)")
 		if not (local_time and total_time) then return global_time end
+		local_time = tonumber(local_time) or 0
 		if summary[word] == nil then
 			summary[word] = {};
 			summary[word]["info"] = {}
@@ -52,7 +53,6 @@ function CreateSummary(lines, summary)
 			summary[word]["info"]["calls"] = summary[word]["info"]["calls"] + 1
 			summary[word]["info"]["total"] = summary[word]["info"]["total"] + local_time;
 		end
-
 		global_time = global_time + local_time;
 	end
 

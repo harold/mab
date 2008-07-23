@@ -130,7 +130,7 @@ if arg.profile then
 	if profiler then
 		print( string.rep("=",70) )
 		print( "Profile written to: "..profiler.__profileFile)
-		print( "Use 'lua test/analyze_profile.lua "..profiler.__profileFile.."' for details." )
+		print( "Use 'lua test/analyze_profile.lua -v "..profiler.__profileFile.." > stats.txt' for details." )
 	end
 	-- print( string.rep("-",70) )
 	-- print( "Additional objects created to show this info: "..(#runtime.ObjectById - LastRuntimeObjectIndex) )
