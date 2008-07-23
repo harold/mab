@@ -44,7 +44,11 @@ Roots.Expression.asCode = createLuaFunc( function( context ) -- Expression#asCod
 		for i,message in ipairs(context.self) do
 			theMessagesCode[i] = runtime.luastring[ sendMessageAsString( message, 'asCode' ) ]
 		end
-		return runtime.string[ table.concat( theMessagesCode, " " ) ]
+		if context.self.parent ~= Roots['nil'] then 
+			return runtime.string[ table.concat( theMessagesCode, " " ) ]
+		else
+			return runtime.string[ table.concat( theMessagesCode, "\n" ) ]
+		end
 	end
 end )
 

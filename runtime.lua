@@ -48,7 +48,7 @@ Meta = {
 					queueSize = queueSize + 1
 					breadthFirstQueue[ queueSize ] = parentObject
 				end
-			else
+			elseif ancestors[1] then
 				queueSize = queueSize + 1
 				breadthFirstQueue[ queueSize ] = ancestors[1]
 			end
@@ -61,7 +61,7 @@ Meta = {
 		local metaNil = Meta.nilValue
 		while currentIndex <= queueSize do
 			local value = rawget( currentObject, slotName )
-			if value and value ~= metaNil then
+			if value ~= nil and value ~= metaNil then
 				return value
 			end
 			
