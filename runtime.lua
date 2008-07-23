@@ -143,19 +143,30 @@ end
 --TODO: remove in favor of Mab implementation
 function isKindOf( object, ancestorObject )
 	local breadthFirstQueue = { object }
-	local currentIndex = 1
+	local currentIndex  = 1
 	local currentObject = object
+	local queueSize = 1
+	local ancestors
 	while currentObject do
 		if not breadthFirstQueue[ currentObject ] then		
 			if currentObject == ancestorObject then
 				return true
 			end
 
-			if AncestorsPerObject[ currentObject ] then
-				for _,parentObject in ipairs(AncestorsPerObject[ currentObject ]) do
-					table.insert( breadthFirstQueue, parentObject )
+			ancestors = AncestorsPerObject[ currentObject ]
+			if ancestors then
+				if ancestors[2] then
+					for _,parentObject in ipairs(ancestors) do
+						queueSize = queueSize + 1
+						breadthFirstQueue[ queueSize ] = parentObject
+					end
+				else
+					queueSize = queueSize + 1
+					breadthFirstQueue[ queueSize ] = ancestors[1]
 				end
 			end
+			
+			-- Mark as visited to prevent circular inheritance
 			breadthFirstQueue[ currentObject ] = true
 		end
 
