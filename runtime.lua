@@ -42,7 +42,7 @@ Meta = {
 		local ancestors = AncestorsPerObject[ object ]
 		if ancestors then
 			if ancestors[2] then				
-				for _,parentObject in ipairs(AncestorsPerObject[ object ]) do
+				for _,parentObject in ipairs(ancestors) do
 					queueSize = queueSize + 1
 					breadthFirstQueue[ queueSize ] = parentObject
 				end
@@ -66,7 +66,7 @@ Meta = {
 			ancestors = AncestorsPerObject[ currentObject ]
 			if ancestors then
 				if ancestors[2] then
-					for _,parentObject in ipairs(AncestorsPerObject[ currentObject ]) do
+					for _,parentObject in ipairs(ancestors) do
 						queueSize = queueSize + 1
 						breadthFirstQueue[ queueSize ] = parentObject
 					end
