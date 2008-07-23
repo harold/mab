@@ -1,3 +1,5 @@
+if not arg.debugLevel then arg.debugLevel = 0 end
+
 module('runtime',package.seeall)
 
 -- indexed by object table, value is array + namespace indexes to ancestors
@@ -34,36 +36,57 @@ end
 -- Shared by every instance
 Meta = {
 	__index = function( object, slotName )
-		local breadthFirstQueue = { object }
-		local currentIndex = 1
-		local currentObject = object
-		while currentObject do
-			-- queue is both an array and a hash of objects already visited
-			if not breadthFirstQueue[ currentObject ] then
-				local value = rawget( currentObject, slotName )
-				if value ~= nil and value ~= Meta.nilValue then
-					return value
+		local breadthFirstQueue = { }
+		local queueSize = 0
+		
+		local ancestors = AncestorsPerObject[ object ]
+		if ancestors then
+			if ancestors[2] then				
+				for _,parentObject in ipairs(AncestorsPerObject[ object ]) do
+					queueSize = queueSize + 1
+					breadthFirstQueue[ queueSize ] = parentObject
 				end
-			
-				if AncestorsPerObject[ currentObject ] then
-					for _,parentObject in ipairs(AncestorsPerObject[ currentObject ]) do
-						table.insert( breadthFirstQueue, parentObject )
-					end
-				end
-
-				-- Mark this table as visited, to prevent circular loops
-				breadthFirstQueue[ currentObject ] = true
 			else
-				--print( "Bailing on "..tostring(currentObject).." because I done seen it!")
+				queueSize = queueSize + 1
+				breadthFirstQueue[ queueSize ] = ancestors[1]
+			end				
+		end		
+
+		local currentIndex = 1
+		local currentObject = breadthFirstQueue[ currentIndex ]
+		
+		-- initially nil; may be set to an object by the core	
+		local metaNil = Meta.nilValue
+		while currentObject do
+			local value = rawget( currentObject, slotName )
+			if value and value ~= metaNil then
+				return value
 			end
+			
+			ancestors = AncestorsPerObject[ currentObject ]
+			if ancestors then
+				if ancestors[2] then
+					for _,parentObject in ipairs(AncestorsPerObject[ currentObject ]) do
+						queueSize = queueSize + 1
+						breadthFirstQueue[ queueSize ] = parentObject
+					end
+				else
+					queueSize = queueSize + 1
+					breadthFirstQueue[ queueSize ] = ancestors[1]
+				end
+			end
+
 			currentIndex = currentIndex + 1
 			currentObject = breadthFirstQueue[ currentIndex ]
 		end
-		return Meta.nilValue -- initially nil; may be set to an object by the core
+
+		-- Only reach here if the slot wasn't found
+		return metaNil
 	end
 }
 
 -- TODO: similar function to insert after a particular existing parent, by id or scope
+-- TODO: detect circular references and fix, since the lookup mechanism had circular detection removed for speed
 function addInheritance( childObject, parentObject, namespace, appendToEnd )
 	local ancestors = AncestorsPerObject[ childObject ]
 	if ancestors then
