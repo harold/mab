@@ -28,6 +28,7 @@ tests = {
 	"15b_SubtleObjectScope",
 	"16_locals_shadow_context",
 	"17_scope_resolution",
+	"17b_lexical_scope",
 	"18_subexpressions"
 }
 

@@ -1,0 +1,7 @@
+Test #17b
+foo
+global
+----
+a---
+-b--
+--c-

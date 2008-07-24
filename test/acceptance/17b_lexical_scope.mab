@@ -1,0 +1,26 @@
+p( "Test #17b" )
+setSlot( "x", 'global' )
+setSlot( "foo", method(
+	setSlot( "x", 'foo' )
+	p( x )
+	bar
+) )
+setSlot( "bar", method(
+	p( x )
+) )
+foo
+
+setSlot( 'recurse', method( depth,
+	if( depth < 4,
+		if( depth == 1, setSlot( "a", 'a' ) )
+		if( depth == 2, setSlot( "b", 'b' ) )
+		if( depth == 3, setSlot( "c", 'c' ) )
+		p( "#{a}#{b}#{c}#{d}" interpolate )
+		recurse( depth + 1 )
+	)
+) )
+setSlot( 'a', '-' )
+setSlot( 'b', '-' )
+setSlot( 'c', '-' )
+setSlot( 'd', '-' )
+recurse( 0 )
